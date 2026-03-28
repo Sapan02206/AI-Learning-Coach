@@ -1,0 +1,76 @@
+# Implementation Plan: AI Learning Consistency Coach
+
+## Goal Description
+Build a web-based React application that acts as an AI learning coach. The system will track user behavior, adapt learning plans dynamically when tasks are missed, and provide intelligent feedback and nudges to maximize student consistency and completion rate. All state will be stored in `localStorage`, and the AI components will be implemented via an intelligent mock service that simulates an LLM response based on structured inputs.
+
+## Architecture & Tech Stack
+- **Frontend Framework**: React 18 (via Vite)
+- **Styling**: Vanilla CSS (CSS Modules / Global Variables for design system)
+- **State Management**: React Hooks (`useState`, `useEffect`, `useReducer` for complex state) + Context API if needed, backed by `localStorage`
+- **AI/Backend**: Simulated API Service running locally on the client-side to handle plan generation and adaptive rescheduling.
+
+## Data Models
+
+`Plan`
+- `id`: string
+- `subjects`: string[]
+- `deadline`: string (ISO Date)
+- `dailyMinutes`: number
+- `difficulty`: 'easy' | 'medium' | 'hard'
+- `createdAt`: string (ISO Date)
+
+`Task`
+- `id`: string
+- `date`: string (YYYY-MM-DD)
+- `title`: string
+- `durationMins`: number
+- `status`: 'pending' | 'completed' | 'missed'
+- `completedAt`: string | null (ISO Date)
+
+`UserStats`
+- `currentStreak`: number
+- `longestStreak`: number
+- `consistencyScore`: number (0-100)
+- `totalTasksCompleted`: number
+- `totalTasksAssigned`: number (up to today)
+
+## Proposed Changes
+
+### 1. Project Initialization & Setup
+- Execute `npm create vite@latest ai-learning-coach -- --template react`
+- Clear default styles and implement a premium design system in `index.css`.
+
+### 2. Core Services (Logic Layer)
+- `src/services/storage.js`: Wrappers for localStorage to load/save `Plan`, `Tasks`, and `UserStats`.
+- `src/services/mockAi.js`: 
+  - `generateStudyPlan(inputs)`: Creates an initial day-wise task list, inserting revision/buffer days based on difficulty.
+  - `generateInsights(tasks, stats)`: Analyzes missed days vs completed days to produce nudges.
+- `src/services/scheduler.js`: 
+  - `rescheduleMissedTasks(tasks)`: Core logic to push missed tasks to future buffer days or redistribute time evenly.
+
+### 3. UI Components
+- `src/App.jsx`: Main routing/state orchestrator.
+- `src/components/Layout/`: Main dashboard shell, sidebar/header.
+- `src/components/Onboarding/PlanForm.jsx`: The smart input system taking subjects, deadline, time, and difficulty.
+- `src/components/Dashboard/DailyTasks.jsx`: Displays today's tasks with checkbox interactions.
+- `src/components/Dashboard/ProgressWidgets.jsx`: Visual representation of streaks, consistency score (animated SVG/Canvas or CSS progress bars).
+- `src/components/Dashboard/InsightsPanel.jsx`: Displays the dynamic nudges and behavioral insights.
+
+### 4. Design System (`src/index.css`)
+- Premium dark-mode/glassmorphism aesthetic.
+- Color palette: Deep blues/purples for background, vibrant accents (neon green/blue) for progress indicators.
+- Typography: Inter or Outfit.
+- Micro-animations: Hover states, task completion strikes, fluid transitions on layout changes.
+
+## Verification Plan
+
+### Automated/Unit Testing (Manual execution simulation)
+- Test the `scheduler.js` heavily: Input an array of tasks where 2 previous days were missed, verify that the remaining tasks are correctly redistributed without exceeding max daily load by too much.
+
+### Manual Verification
+1. Open the app, fill out the form for a 7-day plan.
+2. Verify daily tasks are generated spanning the 7 days.
+3. Mark today's tasks as complete -> Verify streak goes to 1, consistency to 100%.
+4. Simulate a missed day (by changing the system date or manually editing localStorage) -> Verify consistency drops, streak resets.
+5. Trigger the adaptive rescheduling engine -> Verify missed tasks are moved to future days.
+6. Check the Insights Panel for relevant messages based on the missed/completed patterns.
