@@ -12,7 +12,8 @@ export default function SessionSummaryModal({ result, onClose }) {
         presenceChecksPassed = 0,
         presenceChecksFailed = 0,
         trustScoreChange = 0,
-        validationWarnings = []
+        validationWarnings = [],
+        completionPercentage = null
     } = result;
 
     const formatMinSec = (sec) => {
@@ -45,6 +46,12 @@ export default function SessionSummaryModal({ result, onClose }) {
                         <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Focus Score</p>
                         <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: scoreColor }}>{focusScore}%</p>
                     </div>
+                    {completionPercentage !== null && (
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-primary)' }}>
+                            <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Completed</p>
+                            <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-primary)' }}>{completionPercentage}%</p>
+                        </div>
+                    )}
                     {presenceChecksPassed > 0 && (
                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-secondary)' }}>
                             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Verified</p>

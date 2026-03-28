@@ -8,6 +8,8 @@ import InsightsPanel from './components/Dashboard/InsightsPanel';
 import Timer from './components/Dashboard/Timer';
 import ConsistencyHeatmap from './components/Dashboard/ConsistencyHeatmap';
 import BehavioralInsights from './components/Dashboard/BehavioralInsights';
+// import LinkLearningSession from './components/Dashboard/LinkLearningSession';
+// import LinkSessionValidation from './components/Dashboard/LinkSessionValidation';
 import SessionValidationModal from './components/Dashboard/SessionValidationModal';
 import SessionSummaryModal from './components/Dashboard/SessionSummaryModal';
 import { generateStudyPlan, generateInsights } from './services/mockAi';
@@ -23,6 +25,7 @@ export default function App() {
     const [sessionResult, setSessionResult] = useState(null);
     const [insight, setInsight] = useState("");
     const [lastTrustChange, setLastTrustChange] = useState(0);
+    // const [linkSessionData, setLinkSessionData] = useState(null);
 
     // On mount and once per day start: check for missed tasks
     useEffect(() => {
@@ -369,6 +372,124 @@ export default function App() {
         clearAll();
         window.location.reload();
     };
+    
+    /*
+    // Handle link-based learning session completion
+    const handleLinkSessionComplete = (sessionData) => {
+        setLinkSessionData(sessionData);
+    };
+    
+    const handleLinkSessionValidation = (validationData) => {
+        const {
+            completionPercentage,
+            learnings,
+            validationPenalty,
+            validationWarnings
+        } = validationData;
+        
+        const {
+            elapsedSeconds,
+            tabSwitches,
+            interactions,
+            inactiveSeconds,
+            warnings,
+            topic
+        } = linkSessionData;
+        
+        let newStats = { ...stats };
+        if (!newStats.trustScore) newStats.trustScore = 100;
+        
+        // Calculate trust shift for link session
+        let trustShift = 0;
+        
+        // Time quality (minimum 10 minutes for meaningful learning)
+        if (elapsedSeconds >= 600) trustShift += 10;
+        else if (elapsedSeconds >= 300) trustShift += 5;
+        
+        // Interaction level
+        const interactionRate = interactions / (elapsedSeconds / 60);
+        if (interactionRate >= 2) trustShift += 5;
+        else if (interactionRate < 0.5) trustShift -= 15;
+        
+        // Tab switching penalty
+        if (tabSwitches > 0) trustShift -= (tabSwitches * 5);
+        
+        // Inactivity penalty
+        const inactiveMinutes = Math.floor(inactiveSeconds / 60);
+        if (inactiveMinutes > 2) trustShift -= (inactiveMinutes * 3);
+        
+        // Reflection quality
+        if (learnings.trim().length > 50) trustShift += 5;
+        else if (learnings.trim().length < 30) trustShift -= 5;
+        
+        // Validation penalties
+        trustShift -= validationPenalty;
+        trustShift -= (warnings * 5);
+        
+        // Apply trust change
+        const finalTrustShift = trustShift;
+        newStats.trustScore = Math.min(100, Math.max(0, newStats.trustScore + finalTrustShift));
+        setLastTrustChange(finalTrustShift);
+        
+        // Calculate focus score
+        let focusScore = 100;
+        if (elapsedSeconds < 300) focusScore -= 20;
+        if (interactionRate < 1) focusScore -= 20;
+        if (tabSwitches > 0) focusScore -= (tabSwitches * 15);
+        if (inactiveMinutes > 2) focusScore -= (inactiveMinutes * 5);
+        if (validationPenalty > 0) focusScore -= validationPenalty;
+        focusScore = Math.max(0, Math.min(100, focusScore));
+        
+        // Update stats
+        newStats.totalTasksCompleted += 1;
+        
+        // Add to history
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        if (!newStats.history) newStats.history = [];
+        newStats.history.push({
+            date: todayStr,
+            dayOfWeek: format(new Date(), 'EEEE'),
+            status: 'completed',
+            timeRatio: elapsedSeconds / 3600, // Approximate
+            interactions,
+            tabSwitches,
+            focusScore,
+            trustScore: newStats.trustScore,
+            topic: topic || 'External Learning',
+            timestamp: new Date().toISOString(),
+            type: 'link-session'
+        });
+        
+        setStats(newStats);
+        saveStats(newStats);
+        
+        // Generate insight
+        let sessionInsight = '';
+        if (focusScore >= 80) sessionInsight = "🔥 Excellent external learning session!";
+        else if (focusScore >= 50) sessionInsight = "👍 Good session, but try to minimize tab switching.";
+        else sessionInsight = "⚠️ Low engagement detected during external learning.";
+        
+        if (validationWarnings.length > 0) {
+            sessionInsight += ` Issues: ${validationWarnings.join(', ')}`;
+        }
+        
+        setInsight(sessionInsight);
+        
+        // Show session summary
+        setSessionResult({
+            title: topic || 'External Learning',
+            durationMins: Math.floor(elapsedSeconds / 60),
+            sessionSeconds: elapsedSeconds,
+            focusScore,
+            insight: sessionInsight,
+            trustScoreChange: finalTrustShift,
+            validationWarnings,
+            completionPercentage
+        });
+        
+        setLinkSessionData(null);
+    };
+    */
 
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const todaysTasks = tasks.filter(t => t.date === todayStr);
@@ -519,12 +640,14 @@ export default function App() {
                     )}
 
                     {!activeTaskId && !validatingTask && (
-                        <DailyTasks
-                            tasks={todaysTasks}
-                            stats={stats}
-                            onToggleStatus={handleToggleTask}
-                            onStartSession={handleStartSession}
-                        />
+                        <>
+                            <DailyTasks
+                                tasks={todaysTasks}
+                                stats={stats}
+                                onToggleStatus={handleToggleTask}
+                                onStartSession={handleStartSession}
+                            />
+                        </>
                     )}
                 </div>
             )}
@@ -544,6 +667,8 @@ export default function App() {
                     onClose={() => setSessionResult(null)}
                 />
             )}
+            
+            {/* Link learning feature removed - was causing white screen */}
         </Layout>
     );
 }

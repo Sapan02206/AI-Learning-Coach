@@ -1,29 +1,42 @@
-
+﻿
 > ai-learning-coach@1.0.0 build
 > vite build
 
 [36mvite v5.4.21 [32mbuilding for production...[36m[39m
 transforming...
-[32m✓[39m 1706 modules transformed.
-[31mx[39m Build failed in 1.28s
+[32mΓ£ô[39m 1711 modules transformed.
+node.exe : [31mx[39m Build failed in 2.29s
+At C:\Program Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([31mx[39m Build failed in 2.29s:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
 [31merror during build:
-[31msrc/App.jsx (12:9): "storage" is not exported by "src/services/storage.js", imported by "src/App.jsx".[31m
-file: [36mD:/ai-learning-coach/src/App.jsx:12:9[31m
+[31msrc/App.jsx (12:7): "default" is not exported by "src/components/Dashboard/LinkSessionValidation.jsx", 
+imported by "src/App.jsx".[31m
+file: [36mD:/ai-learning-coach/src/App.jsx:12:7[31m
 [33m
-10: import SessionSummaryModal from './components/Dashboard/SessionSummaryModal';
-11: import { generateStudyPlan, runAgentIntelligence } from './services/mockAi';
-12: import { storage } from './services/storage';
-             ^
-13: 
-14: export default function App() {
+10: import BehavioralInsights from './components/Dashboard/BehavioralInsights';
+11: import LinkLearningSession from './components/Dashboard/LinkLearningSession';
+12: import LinkSessionValidation from './components/Dashboard/LinkSessionValidation';
+           ^
+13: import SessionValidationModal from './components/Dashboard/SessionValidationModal';
+14: import SessionSummaryModal from './components/Dashboard/SessionSummaryModal';
 [31m
     at getRollupError (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/parseAst.js:406:41)
     at error (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/parseAst.js:402:42)
     at Module.error (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:17065:16)
-    at Module.traceVariable (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:17477:29)
-    at ModuleScope.findVariable (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:15090:39)
-    at FunctionScope.findVariable (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
-    at FunctionBodyScope.findVariable (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
-    at ReturnValueScope.findVariable (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
-    at FunctionBodyScope.findVariable (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
-    at MemberExpression.bind (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:7395:49)[39m
+    at Module.traceVariable 
+(file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:17477:29)
+    at ModuleScope.findVariable 
+(file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:15090:39)
+    at FunctionScope.findVariable 
+(file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
+    at FunctionBodyScope.findVariable 
+(file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
+    at Identifier.bind (file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:5450:40)
+    at CallExpression.bind 
+(file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:2828:28)
+    at CallExpression.bind 
+(file:///D:/ai-learning-coach/node_modules/rollup/dist/es/shared/node-entry.js:12199:15)[39m
