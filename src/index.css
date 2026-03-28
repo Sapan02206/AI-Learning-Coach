@@ -113,6 +113,8 @@ body {
 /* Button Styles */
 button {
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 button:hover:not(:disabled) {
@@ -122,6 +124,30 @@ button:hover:not(:disabled) {
 
 button:active:not(:disabled) {
   transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button ripple effect */
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:active:not(:disabled)::after {
+  width: 300px;
+  height: 300px;
 }
 
 /* Scrollbar Styling */

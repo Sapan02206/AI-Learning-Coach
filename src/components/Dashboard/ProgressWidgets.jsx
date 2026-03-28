@@ -28,8 +28,10 @@ const AnimatedNumber = ({ value }) => {
     return <>{display}</>;
 };
 
-export default function ProgressWidgets({ stats }) {
+export default function ProgressWidgets({ stats, lastTrustChange = 0 }) {
     const trustScore = stats.trustScore ?? 100;
+    const [feedbackMessage, setFeedbackMessage] = useState('');
+    const [showFeedback, setShowFeedback] = useState(false);
 
     // Animate pulse on trust score change
     const [pulseClass, setPulseClass] = useState('');
@@ -38,6 +40,25 @@ export default function ProgressWidgets({ stats }) {
         const timer = setTimeout(() => setPulseClass(''), 600);
         return () => clearTimeout(timer);
     }, [trustScore]);
+    
+    // Show feedback message on trust change
+    useEffect(() => {
+        if (lastTrustChange !== 0) {
+            if (lastTrustChange > 10) {
+                setFeedbackMessage('🔥 Strong consistency detected!');
+            } else if (lastTrustChange > 0) {
+                setFeedbackMessage('✓ Good progress!');
+            } else if (lastTrustChange < -10) {
+                setFeedbackMessage('⚠️ Low engagement detected');
+            } else if (lastTrustChange < 0) {
+                setFeedbackMessage('⚠️ Trust decreased');
+            }
+            
+            setShowFeedback(true);
+            const timer = setTimeout(() => setShowFeedback(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [lastTrustChange]);
 
     // Calculate Risk
     let riskLevel = 'Low';
@@ -86,6 +107,23 @@ export default function ProgressWidgets({ stats }) {
                                 <span style={{ color: 'var(--text-muted)' }}>that learning is genuine.</span>
                             </p>
                         </div>
+                        
+                        {/* Feedback Message */}
+                        {showFeedback && (
+                            <div className="fade-in" style={{
+                                marginTop: '1rem',
+                                padding: '0.75rem 1rem',
+                                background: lastTrustChange > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                border: `1px solid ${lastTrustChange > 0 ? 'var(--accent-secondary)' : 'var(--danger)'}`,
+                                borderRadius: '8px',
+                                color: lastTrustChange > 0 ? 'var(--accent-secondary)' : 'var(--danger)',
+                                fontWeight: 'bold',
+                                fontSize: '0.9rem',
+                                textAlign: 'center'
+                            }}>
+                                {feedbackMessage}
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>

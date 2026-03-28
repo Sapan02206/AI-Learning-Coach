@@ -6,7 +6,9 @@ import ProgressWidgets from './components/Dashboard/ProgressWidgets';
 import DailyTasks from './components/Dashboard/DailyTasks';
 import InsightsPanel from './components/Dashboard/InsightsPanel';
 import Timer from './components/Dashboard/Timer';
-import QuickValidationModal from './components/Dashboard/QuickValidationModal';
+import ConsistencyHeatmap from './components/Dashboard/ConsistencyHeatmap';
+import BehavioralInsights from './components/Dashboard/BehavioralInsights';
+import SessionValidationModal from './components/Dashboard/SessionValidationModal';
 import SessionSummaryModal from './components/Dashboard/SessionSummaryModal';
 import { generateStudyPlan, generateInsights } from './services/mockAi';
 import { savePlan, getPlan, saveTasks, getTasks, saveStats, getStats, clearAll } from './services/storage';
@@ -20,6 +22,7 @@ export default function App() {
     const [sessionSeconds, setSessionSeconds] = useState(0);
     const [sessionResult, setSessionResult] = useState(null);
     const [insight, setInsight] = useState("");
+    const [lastTrustChange, setLastTrustChange] = useState(0);
 
     // On mount and once per day start: check for missed tasks
     useEffect(() => {
@@ -103,8 +106,10 @@ export default function App() {
                     timeRatio: externalRatio,
                     interactions: sessionMetrics?.interactions || 0,
                     tabSwitches: sessionMetrics?.tabSwitches || 0,
-                    focusScore: sessionMetrics?.focusScore,
-                    topic: sessionMetrics?.topic
+                    focusScore: sessionMetrics?.focusScore || 70,
+                    trustScore: newStats.trustScore,
+                    topic: sessionMetrics?.topic,
+                    timestamp: new Date().toISOString()
                 });
             }
         }
@@ -121,7 +126,17 @@ export default function App() {
     };
 
     const handleStopTimer = (sessionData) => {
-        const { seconds, tabSwitches, interactions, completedSubtasks } = sessionData;
+        const { 
+            seconds, 
+            tabSwitches, 
+            interactions, 
+            completedSubtasks,
+            presenceChecksPassed = 0,
+            presenceChecksFailed = 0,
+            inactiveSeconds = 0,
+            confidenceDecay = 0,
+            warnings = 0
+        } = sessionData;
 
         const task = tasks.find(t => t.id === activeTaskId);
         const targetSeconds = task.durationMins * 60;
@@ -142,33 +157,142 @@ export default function App() {
         }
 
         setSessionSeconds(seconds);
-        setValidatingTask({ ...task, sessionMetadata: sessionData });
+        setValidatingTask({ 
+            ...task, 
+            sessionMetadata: {
+                ...sessionData,
+                presenceChecksPassed,
+                presenceChecksFailed,
+                inactiveSeconds,
+                confidenceDecay,
+                warnings
+            }
+        });
         setActiveTaskId(null);
     };
 
-    const handleValidationSubmit = (answer) => {
+    const handleValidationSubmit = (validationData) => {
         const task = validatingTask;
-        const { seconds, tabSwitches, interactions, completedSubtasks } = task.sessionMetadata;
+        const { 
+            seconds, 
+            tabSwitches, 
+            interactions, 
+            completedSubtasks,
+            presenceChecksPassed = 0,
+            presenceChecksFailed = 0,
+            inactiveSeconds = 0,
+            confidenceDecay = 0,
+            warnings = 0
+        } = task.sessionMetadata;
+        
+        const {
+            topicsStudied = '',
+            timeEstimate = 0,
+            reflection = '',
+            validationPenalty = 0,
+            validationWarnings = []
+        } = validationData;
 
         let newStats = { ...stats };
         if (!newStats.trustScore) newStats.trustScore = 100;
 
-        // Trust Algorithm (Multi-Signal)
+        // Enhanced Trust Algorithm with Anti-Cheat Signals
         let trustShift = 0;
 
+        // 1. Time Quality
         const targetSeconds = task.durationMins * 60;
         if (seconds > targetSeconds * 0.8) trustShift += 10;
         else if (seconds > targetSeconds * 0.5) trustShift += 5;
 
+        // 2. Interaction Level
         if (interactions < 3) trustShift -= 15;
         else if (interactions > 10) trustShift += 5;
 
+        // 3. Tab Switching Penalty
         if (tabSwitches > 0) trustShift -= (tabSwitches * 5);
 
-        if (answer.trim().length > 40) trustShift += 5;
-        else if (answer.trim().length < 20) trustShift -= 5;
+        // 4. Reflection Quality
+        if (reflection.trim().length > 40) trustShift += 5;
+        else if (reflection.trim().length < 20) trustShift -= 5;
+        
+        // 5. Presence Check Performance (NEW)
+        if (presenceChecksPassed > 0) trustShift += (presenceChecksPassed * 8);
+        if (presenceChecksFailed > 0) trustShift -= (presenceChecksFailed * 20);
+        
+        // 6. Inactivity Penalty (NEW)
+        const inactiveMinutes = Math.floor(inactiveSeconds / 60);
+        if (inactiveMinutes > 2) trustShift -= (inactiveMinutes * 3);
+        
+        // 7. Confidence Decay (NEW)
+        trustShift -= confidenceDecay;
+        
+        // 8. Session Validation Penalty (NEW)
+        trustShift -= validationPenalty;
+        
+        // 9. Warning Penalties (NEW)
+        trustShift -= (warnings * 5);
 
         newStats.trustScore = Math.min(100, Math.max(0, newStats.trustScore + trustShift));
+        
+        // Behavior Pattern Detection
+        if (!newStats.behaviorPatterns) newStats.behaviorPatterns = [];
+        
+        const sessionPattern = {
+            duration: seconds,
+            interactions,
+            tabSwitches,
+            presenceChecksPassed,
+            presenceChecksFailed,
+            inactiveMinutes,
+            timestamp: Date.now()
+        };
+        
+        newStats.behaviorPatterns.push(sessionPattern);
+        
+        // Keep only last 10 sessions for pattern analysis
+        if (newStats.behaviorPatterns.length > 10) {
+            newStats.behaviorPatterns = newStats.behaviorPatterns.slice(-10);
+        }
+        
+        // Detect Suspicious Patterns
+        let suspiciousPatternDetected = false;
+        let patternWarning = '';
+        
+        if (newStats.behaviorPatterns.length >= 3) {
+            const recentPatterns = newStats.behaviorPatterns.slice(-3);
+            
+            // Same exact duration repeatedly
+            const durations = recentPatterns.map(p => p.duration);
+            const allSame = durations.every(d => Math.abs(d - durations[0]) < 10);
+            if (allSame) {
+                suspiciousPatternDetected = true;
+                patternWarning = '⚠️ Unusual activity pattern detected: Identical session durations';
+                trustShift -= 10;
+            }
+            
+            // Perfect streak with no variation
+            const avgInteractions = recentPatterns.reduce((sum, p) => sum + p.interactions, 0) / recentPatterns.length;
+            if (avgInteractions < 2) {
+                suspiciousPatternDetected = true;
+                patternWarning = '⚠️ Unusual activity pattern detected: Consistently low interaction';
+                trustShift -= 15;
+            }
+            
+            // Multiple presence check failures
+            const totalFailed = recentPatterns.reduce((sum, p) => sum + p.presenceChecksFailed, 0);
+            if (totalFailed >= 2) {
+                suspiciousPatternDetected = true;
+                patternWarning = '⚠️ Unusual activity pattern detected: Multiple presence check failures';
+                trustShift -= 20;
+            }
+        }
+        
+        // Apply final trust score after pattern detection
+        const finalTrustShift = trustShift + (suspiciousPatternDetected ? -10 : 0);
+        newStats.trustScore = Math.min(100, Math.max(0, newStats.trustScore + finalTrustShift));
+        
+        // Track trust change for visual feedback
+        setLastTrustChange(finalTrustShift);
 
         // Auto-complete all subtasks immutably
         let updatedTasksForToggle = tasks.map(t => {
@@ -181,7 +305,7 @@ export default function App() {
 
         const ratio = seconds / targetSeconds;
 
-        // Calculate Strict Focus Score (0-100) per session
+        // Calculate Enhanced Focus Score
         let focusScore = 100;
         if (seconds < targetSeconds * 0.5) focusScore -= 20;
         else if (seconds < targetSeconds * 0.8) focusScore -= 10;
@@ -190,7 +314,12 @@ export default function App() {
         else if (interactions < 10) focusScore -= 15;
 
         if (tabSwitches > 0) focusScore -= (tabSwitches * 20);
-        if (answer.trim().length < 30) focusScore -= 15;
+        if (reflection.trim().length < 30) focusScore -= 15;
+        
+        // New penalties
+        if (presenceChecksFailed > 0) focusScore -= (presenceChecksFailed * 25);
+        if (inactiveMinutes > 2) focusScore -= (inactiveMinutes * 5);
+        if (validationPenalty > 0) focusScore -= validationPenalty;
 
         focusScore = Math.max(0, Math.min(100, focusScore));
 
@@ -198,14 +327,25 @@ export default function App() {
         if (focusScore >= 80) sessionInsight = "🔥 Excellent session! High interaction and solid focus.";
         else if (focusScore >= 50) sessionInsight = "👍 Good session, but try taking more notes or switching tabs less.";
         else sessionInsight = "⚠️ Low engagement detected. Poor time ratio or heavy tab switching.";
+        
+        if (suspiciousPatternDetected) {
+            sessionInsight = patternWarning;
+        }
+        
+        if (validationWarnings.length > 0) {
+            sessionInsight += ` Validation issues: ${validationWarnings.join(', ')}`;
+        }
 
         // Bypass implicit penalty by passing newStats directly
-        // We also pass the pre-updated tasks array so handleToggleTask doesn't overwrite our subtask completions!
         handleToggleTask(task.id, 'completed', newStats, ratio, {
             interactions,
             tabSwitches,
             focusScore,
-            topic: task.title
+            topic: task.title,
+            presenceChecksPassed,
+            presenceChecksFailed,
+            inactiveMinutes,
+            validationWarnings: validationWarnings.length
         }, updatedTasksForToggle);
 
         setValidatingTask(null);
@@ -217,7 +357,11 @@ export default function App() {
             durationMins: task.durationMins,
             sessionSeconds: seconds,
             focusScore,
-            insight: sessionInsight
+            insight: sessionInsight,
+            presenceChecksPassed,
+            presenceChecksFailed,
+            trustScoreChange: trustShift,
+            validationWarnings
         });
     };
 
@@ -319,7 +463,7 @@ export default function App() {
                         </button>
                     </div>
 
-                    <ProgressWidgets stats={stats} />
+                    <ProgressWidgets stats={stats} lastTrustChange={lastTrustChange} />
 
                     {failurePrediction && (
                         <div style={{ padding: '1rem', marginBottom: '1.5rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', fontSize: '0.9rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -347,6 +491,12 @@ export default function App() {
                     )}
 
                     <InsightsPanel message={insight} />
+
+                    {/* Visual Analytics Section */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                        <ConsistencyHeatmap history={stats.history} days={14} />
+                        <BehavioralInsights stats={stats} history={stats.history} />
+                    </div>
 
                     {weakAreas.length > 0 && (
                         <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '1.5rem', borderLeft: '4px solid var(--danger)' }}>
@@ -380,8 +530,9 @@ export default function App() {
             )}
 
             {validatingTask && (
-                <QuickValidationModal
+                <SessionValidationModal
                     task={validatingTask}
+                    sessionData={validatingTask.sessionMetadata}
                     onSubmit={handleValidationSubmit}
                     onCancel={() => setValidatingTask(null)}
                 />

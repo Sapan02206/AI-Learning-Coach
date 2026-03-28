@@ -3,7 +3,17 @@ import { Target, Clock, Zap, CheckCircle2 } from 'lucide-react';
 export default function SessionSummaryModal({ result, onClose }) {
     if (!result) return null;
 
-    const { title, durationMins, focusScore, sessionSeconds, insight } = result;
+    const { 
+        title, 
+        durationMins, 
+        focusScore, 
+        sessionSeconds, 
+        insight,
+        presenceChecksPassed = 0,
+        presenceChecksFailed = 0,
+        trustScoreChange = 0,
+        validationWarnings = []
+    } = result;
 
     const formatMinSec = (sec) => {
         const m = Math.floor(sec / 60);
@@ -35,10 +45,33 @@ export default function SessionSummaryModal({ result, onClose }) {
                         <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Focus Score</p>
                         <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: scoreColor }}>{focusScore}%</p>
                     </div>
+                    {presenceChecksPassed > 0 && (
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-secondary)' }}>
+                            <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Verified</p>
+                            <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-secondary)' }}>{presenceChecksPassed}x ✓</p>
+                        </div>
+                    )}
+                    {presenceChecksFailed > 0 && (
+                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--danger)' }}>
+                            <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Missed Checks</p>
+                            <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--danger)' }}>{presenceChecksFailed}x</p>
+                        </div>
+                    )}
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: `3px solid ${trustScoreChange >= 0 ? 'var(--accent-secondary)' : 'var(--danger)'}` }}>
+                        <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Trust Change</p>
+                        <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: trustScoreChange >= 0 ? 'var(--accent-secondary)' : 'var(--danger)' }}>
+                            {trustScoreChange >= 0 ? '+' : ''}{trustScoreChange}
+                        </p>
+                    </div>
                 </div>
 
                 <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: `4px solid ${scoreColor}`, textAlign: 'left', marginBottom: '2rem' }}>
                     <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)' }}>{insight}</p>
+                    {validationWarnings.length > 0 && (
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: 'var(--warning)' }}>
+                            ⚠️ {validationWarnings.length} validation issue(s) detected
+                        </p>
+                    )}
                 </div>
 
                 <button
