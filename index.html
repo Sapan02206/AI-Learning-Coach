@@ -571,14 +571,17 @@ textarea:focus {
                     return;
                 }
                 
-                console.log('Extracted video ID:', id);
+                console.log('🔍 Extracted video ID:', id);
+                console.log('🔍 Starting content validation...');
                 
                 // Validate content
                 const isValid = await validateVideoContent(id);
                 
+                console.log('🔍 Validation result:', isValid ? 'ALLOWED' : 'BLOCKED');
+                
                 if (!isValid) {
-                    setValidationError('⚠️ NON-EDUCATIONAL CONTENT DETECTED!');
-                    alert('🚨 CHEATING ATTEMPT DETECTED!\n\nThis video appears to be entertainment/non-educational content.\n\nYour trust score will be reduced by 10%.\n\nPlease use educational videos only.');
+                    setValidationError('⚠️ NON-EDUCATIONAL CONTENT BLOCKED!');
+                    alert('🚨 NON-EDUCATIONAL CONTENT DETECTED!\n\nThis video is not educational content.\n\nOnly educational videos are allowed:\n- Tutorials\n- Lectures\n- Courses\n- Programming/Coding\n- Science/Math\n- Study materials\n\nYour trust score will be reduced by 10%.');
                     
                     // Apply penalty
                     const currentStats = getStats();
@@ -587,10 +590,12 @@ textarea:focus {
                     saveStats(currentStats);
                     
                     setSessionData(prev => ({ ...prev, cheatingAttempts: prev.cheatingAttempts + 1 }));
+                    
+                    console.error('❌ VIDEO BLOCKED - Non-educational content');
                     return;
                 }
                 
-                console.log('✓ Content validated, starting session...');
+                console.log('✅ Content validated, starting session...');
                 setVideoId(id);
                 setIsActive(true);
                 setSessionData(prev => ({ ...prev, startTime: Date.now() }));
