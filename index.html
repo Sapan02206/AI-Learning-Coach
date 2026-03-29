@@ -651,12 +651,19 @@ textarea:focus {
                         const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
                         
                         if (!response.ok) {
-                            console.warn('Could not fetch video metadata - ALLOWING by default');
+                            console.warn('Could not fetch video metadata - Asking user to verify');
                             setIsValidating(false);
                             
-                            // Allow by default, monitor through engagement
-                            console.log('✓ API failed - ALLOWING with engagement monitoring');
-                            return true;
+                            // Ask user since we can't validate
+                            const userConfirmed = confirm(
+                                `⚠️ UNABLE TO VERIFY VIDEO\n\n` +
+                                `We couldn't fetch video information.\n\n` +
+                                `✓ Click OK if this IS educational content\n` +
+                                `✗ Click Cancel to not use this video\n\n` +
+                                `Note: Your engagement will be monitored.`
+                            );
+                            
+                            return userConfirmed;
                         }
                         
                         const data = await response.json();
@@ -698,30 +705,59 @@ textarea:focus {
                             return true;
                         }
                         
-                        // STEP 4: No clear indicators - ALLOW with tracking
-                        // Don't interrupt learning flow, but track for behavioral analysis
-                        console.warn('⚠️ Cannot determine content type - ALLOWING with tracking');
+                        // STEP 4: No educational indicators found - Ask user to verify
+                        // This handles legitimate educational videos without obvious keywords
+                        console.warn('⚠️ No educational keywords found - Asking user to verify');
                         setIsValidating(false);
                         
-                        // Store that this was an unclear video (for behavioral tracking)
-                        // This will be monitored through engagement metrics instead
-                        console.log('✓ Unclear content ALLOWED - Will monitor engagement');
+                        // Show verification dialog with video details
+                        const userConfirmed = confirm(
+                            `⚠️ EDUCATIONAL CONTENT VERIFICATION\n\n` +
+                            `Video: "${data.title}"\n` +
+                            `Channel: "${data.author_name}"\n\n` +
+                            `This video doesn't have clear educational keywords.\n\n` +
+                            `✓ Click OK if this IS educational content\n` +
+                            `✗ Click Cancel if this is NOT educational\n\n` +
+                            `Note: Your choice will be monitored through engagement metrics.\n` +
+                            `Low engagement will reduce your trust score.`
+                        );
+                        
+                        if (!userConfirmed) {
+                            console.log('❌ User confirmed NOT educational - BLOCKING');
+                            return false;
+                        }
+                        
+                        console.log('✓ User confirmed educational - ALLOWING with monitoring');
                         return true;
                     } catch (fetchError) {
-                        console.warn('Fetch error - ALLOWING by default:', fetchError);
+                        console.warn('Fetch error - Asking user to verify:', fetchError);
                         setIsValidating(false);
                         
-                        // Allow by default, monitor through engagement
-                        console.log('✓ Fetch error - ALLOWING with engagement monitoring');
-                        return true;
+                        // Ask user since validation failed
+                        const userConfirmed = confirm(
+                            `⚠️ VALIDATION ERROR\n\n` +
+                            `We couldn't verify this video.\n\n` +
+                            `✓ Click OK if this IS educational content\n` +
+                            `✗ Click Cancel to not use this video\n\n` +
+                            `Note: Your engagement will be monitored.`
+                        );
+                        
+                        return userConfirmed;
                     }
                 } catch (error) {
-                    console.error('Validation error - ALLOWING by default:', error);
+                    console.error('Validation error - Asking user to verify:', error);
                     setIsValidating(false);
                     
-                    // Allow by default, monitor through engagement
-                    console.log('✓ Validation error - ALLOWING with engagement monitoring');
-                    return true;
+                    // Ask user since validation failed
+                    const userConfirmed = confirm(
+                        `⚠️ VALIDATION ERROR\n\n` +
+                        `We couldn't verify this video.\n\n` +
+                        `✓ Click OK if this IS educational content\n` +
+                        `✗ Click Cancel to not use this video\n\n` +
+                        `Note: Your engagement will be monitored.`
+                    );
+                    
+                    return userConfirmed;
                 }
             };
             
@@ -961,7 +997,7 @@ textarea:focus {
                         style: { width: '100%', padding: '0.75rem', marginBottom: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
                     }),
                     React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' } }, 
-                        '✓ Only entertainment content (music, gaming, vlogs) is blocked. All other videos are allowed and monitored through engagement.'
+                        '🔒 Entertainment content is blocked. Educational videos are auto-approved. Unclear videos require your confirmation and will be monitored.'
                     ),
                     React.createElement('button', {
                         onClick: handleStartSession,
