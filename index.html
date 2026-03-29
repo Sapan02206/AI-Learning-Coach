@@ -3247,7 +3247,15 @@ textarea:focus {
         function App() {
             const [plan, setPlan] = useState(() => getPlan());
             const [tasks, setTasks] = useState(() => getTasks());
-            const [stats, setStats] = useState(() => getStats());
+            const [stats, setStats] = useState(() => {
+                const loadedStats = getStats();
+                // Recalculate consistency score on load
+                if (loadedStats.totalTasksAssigned > 0) {
+                    loadedStats.consistencyScore = Math.round((loadedStats.totalTasksCompleted / loadedStats.totalTasksAssigned) * 100);
+                    saveStats(loadedStats); // Save the corrected value
+                }
+                return loadedStats;
+            });
             const [activeTaskId, setActiveTaskId] = useState(null);
             const [validatingTask, setValidatingTask] = useState(null);
             const [sessionSeconds, setSessionSeconds] = useState(0);
