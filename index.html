@@ -486,7 +486,7 @@ textarea:focus {
                 try {
                     console.log('Validating video content for ID:', videoId);
                     
-                    // Educational keywords - MUST have at least one
+                    // Educational keywords - Strong indicators of educational content
                     const educationalKeywords = [
                         'tutorial', 'lecture', 'course', 'learn', 'education', 'study',
                         'lesson', 'teaching', 'training', 'guide', 'how to', 'explained',
@@ -499,20 +499,43 @@ textarea:focus {
                         'machine learning', 'artificial intelligence', 'data science',
                         'web development', 'app development', 'python', 'java', 'javascript',
                         'react', 'angular', 'vue', 'node', 'sql', 'css', 'html',
-                        'exam', 'test', 'preparation', 'interview', 'career', 'skill'
+                        'exam', 'test', 'preparation', 'interview', 'career', 'skill',
+                        'class', 'workshop', 'seminar', 'webinar', 'bootcamp', 'academy',
+                        'university', 'college', 'school', 'professor', 'instructor', 'teacher',
+                        'chapter', 'module', 'unit', 'assignment', 'homework', 'project',
+                        'theory', 'concept', 'principle', 'fundamental', 'basics', 'advanced',
+                        'beginner', 'intermediate', 'expert', 'certification', 'degree'
                     ];
                     
-                    // Non-educational keywords - BLOCK if found
-                    const nonEducationalKeywords = [
-                        'music', 'song', 'movie', 'trailer', 'game', 'gaming', 'gameplay',
-                        'funny', 'meme', 'vlog', 'prank', 'comedy', 'entertainment',
-                        'tmkoc', 'taarak mehta', 'serial', 'episode', 'show', 'drama',
-                        'cartoon', 'anime', 'film', 'cinema', 'bollywood', 'hollywood',
-                        'dance', 'party', 'celebration', 'wedding', 'travel', 'food',
-                        'cooking show', 'reality show', 'talent show', 'sports', 'cricket',
-                        'football', 'match', 'highlights', 'goals', 'funny moments',
-                        'best scenes', 'compilation', 'reaction', 'review', 'unboxing',
-                        'haul', 'makeup', 'fashion', 'lifestyle', 'daily vlog'
+                    // Entertainment keywords - Strong indicators of non-educational content
+                    const entertainmentKeywords = [
+                        'music video', 'official video', 'lyric video', 'audio', 'song',
+                        'movie', 'trailer', 'teaser', 'clip', 'scene', 'film',
+                        'gameplay', 'gaming', 'let\'s play', 'walkthrough', 'playthrough',
+                        'funny', 'meme', 'comedy', 'laugh', 'hilarious', 'roast',
+                        'vlog', 'daily vlog', 'prank', 'challenge', 'tag',
+                        'tmkoc', 'taarak mehta', 'serial', 'episode', 'tv show',
+                        'drama', 'soap opera', 'reality show', 'talent show',
+                        'cartoon', 'anime', 'animated', 'kids show',
+                        'bollywood', 'hollywood', 'celebrity', 'gossip',
+                        'dance', 'party', 'dj', 'remix', 'mashup',
+                        'wedding', 'birthday', 'celebration', 'event',
+                        'travel vlog', 'vacation', 'trip', 'tour',
+                        'food vlog', 'mukbang', 'eating', 'tasting',
+                        'sports', 'cricket', 'football', 'match', 'highlights',
+                        'goals', 'best moments', 'funny moments', 'fails',
+                        'compilation', 'reaction', 'reacting to', 'responds to',
+                        'unboxing', 'haul', 'shopping', 'review',
+                        'makeup', 'beauty', 'fashion', 'outfit', 'styling',
+                        'lifestyle', 'routine', 'day in life', 'behind the scenes',
+                        'podcast', 'interview', 'talk show', 'chat'
+                    ];
+                    
+                    // Educational channel indicators
+                    const educationalChannelKeywords = [
+                        'academy', 'education', 'learning', 'tutorial', 'course',
+                        'university', 'college', 'school', 'institute', 'training',
+                        'tech', 'code', 'programming', 'developer', 'engineer'
                     ];
                     
                     // Try to fetch video metadata
@@ -520,9 +543,19 @@ textarea:focus {
                         const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
                         
                         if (!response.ok) {
-                            console.warn('Could not fetch video metadata, ALLOWING by default (benefit of doubt)');
+                            console.warn('Could not fetch video metadata - Asking user to confirm');
                             setIsValidating(false);
-                            return true; // ALLOW if can't validate (give benefit of doubt)
+                            
+                            // Ask user to confirm since we can't validate
+                            const userConfirmed = confirm(
+                                `⚠️ UNABLE TO VALIDATE VIDEO\n\n` +
+                                `We couldn't verify this video's content.\n\n` +
+                                `Is this educational content?\n` +
+                                `(Click OK if YES, Cancel if NO)\n\n` +
+                                `⚠️ Warning: Confirming non-educational content will reduce your trust score by 15%.`
+                            );
+                            
+                            return userConfirmed;
                         }
                         
                         const data = await response.json();
@@ -531,42 +564,90 @@ textarea:focus {
                         console.log('Video title:', data.title);
                         console.log('Channel:', data.author_name);
                         
-                        // FIRST: Check for non-educational keywords (BLOCK immediately)
-                        const hasNonEducational = nonEducationalKeywords.some(keyword => 
+                        // STEP 1: Check for entertainment keywords (BLOCK immediately if found)
+                        const hasEntertainment = entertainmentKeywords.some(keyword => 
                             title.includes(keyword) || author.includes(keyword)
                         );
                         
-                        if (hasNonEducational) {
-                            console.warn('❌ Non-educational content detected in title/channel');
+                        if (hasEntertainment) {
+                            console.warn('❌ Entertainment content detected - BLOCKING');
                             setIsValidating(false);
                             return false;
                         }
                         
-                        // SECOND: Check for educational keywords (ALLOW if found)
-                        const hasEducational = educationalKeywords.some(keyword => 
-                            title.includes(keyword) || author.includes(keyword)
+                        // STEP 2: Check for educational keywords in title (ALLOW if found)
+                        const hasEducationalTitle = educationalKeywords.some(keyword => 
+                            title.includes(keyword)
                         );
                         
-                        if (hasEducational) {
-                            console.log('✓ Educational keywords found - ALLOWING');
+                        if (hasEducationalTitle) {
+                            console.log('✓ Educational keywords in title - ALLOWING');
                             setIsValidating(false);
                             return true;
                         }
                         
-                        // THIRD: If no clear indicators, ALLOW by default (benefit of doubt)
-                        // Only block if explicitly non-educational
-                        console.log('⚠️ No clear educational keywords, but no entertainment keywords either - ALLOWING');
+                        // STEP 3: Check for educational channel (ALLOW if found)
+                        const hasEducationalChannel = educationalChannelKeywords.some(keyword => 
+                            author.includes(keyword)
+                        );
+                        
+                        if (hasEducationalChannel) {
+                            console.log('✓ Educational channel detected - ALLOWING');
+                            setIsValidating(false);
+                            return true;
+                        }
+                        
+                        // STEP 4: No clear indicators - Ask user to confirm
+                        console.warn('⚠️ Cannot determine content type - Asking user to confirm');
                         setIsValidating(false);
+                        
+                        // Show confirmation dialog
+                        const userConfirmed = confirm(
+                            `⚠️ CONTENT VERIFICATION NEEDED\n\n` +
+                            `Video: "${data.title}"\n` +
+                            `Channel: "${data.author_name}"\n\n` +
+                            `This video doesn't have clear educational indicators.\n\n` +
+                            `Is this educational content?\n` +
+                            `(Click OK if YES, Cancel if NO)\n\n` +
+                            `⚠️ Warning: Confirming non-educational content will reduce your trust score by 15%.`
+                        );
+                        
+                        if (!userConfirmed) {
+                            console.log('User cancelled - not educational');
+                            return false;
+                        }
+                        
+                        console.log('✓ User confirmed as educational - ALLOWING');
                         return true;
                     } catch (fetchError) {
-                        console.warn('Fetch error, ALLOWING video (benefit of doubt):', fetchError);
+                        console.warn('Fetch error - Asking user to confirm:', fetchError);
                         setIsValidating(false);
-                        return true; // ALLOW if validation fails (give benefit of doubt)
+                        
+                        // Ask user to confirm since validation failed
+                        const userConfirmed = confirm(
+                            `⚠️ VALIDATION ERROR\n\n` +
+                            `We couldn't verify this video's content.\n\n` +
+                            `Is this educational content?\n` +
+                            `(Click OK if YES, Cancel if NO)\n\n` +
+                            `⚠️ Warning: Confirming non-educational content will reduce your trust score by 15%.`
+                        );
+                        
+                        return userConfirmed;
                     }
                 } catch (error) {
                     console.error('Validation error:', error);
                     setIsValidating(false);
-                    return true; // ALLOW by default if validation fails (benefit of doubt)
+                    
+                    // Ask user to confirm since validation failed
+                    const userConfirmed = confirm(
+                        `⚠️ VALIDATION ERROR\n\n` +
+                        `We couldn't verify this video's content.\n\n` +
+                        `Is this educational content?\n` +
+                        `(Click OK if YES, Cancel if NO)\n\n` +
+                        `⚠️ Warning: Confirming non-educational content will reduce your trust score by 15%.`
+                    );
+                    
+                    return userConfirmed;
                 }
             };
             
@@ -806,7 +887,7 @@ textarea:focus {
                         style: { width: '100%', padding: '0.75rem', marginBottom: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
                     }),
                     React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' } }, 
-                        '✓ Educational videos allowed. Only entertainment content (music, gaming, vlogs, etc.) will be blocked.'
+                        '✓ Educational videos with clear indicators are auto-approved. Others require confirmation. Entertainment content is blocked.'
                     ),
                     React.createElement('button', {
                         onClick: handleStartSession,
