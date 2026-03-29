@@ -3368,6 +3368,11 @@ textarea:focus {
                 newStats.totalTasksCompleted += 1;
                 newStats.trustScore = Math.max(0, Math.min(100, newStats.trustScore + trustScoreChange));
                 
+                // Calculate consistency score based on completion rate
+                newStats.consistencyScore = newStats.totalTasksAssigned > 0 
+                    ? Math.round((newStats.totalTasksCompleted / newStats.totalTasksAssigned) * 100)
+                    : 100;
+                
                 // Add to history
                 const todayStr = format(new Date(), 'yyyy-MM-dd');
                 newStats.history.push({
@@ -3476,6 +3481,11 @@ textarea:focus {
                 
                 if (status === 'completed') {
                     newStats.totalTasksCompleted += 1;
+                    
+                    // Calculate consistency score based on completion rate
+                    newStats.consistencyScore = newStats.totalTasksAssigned > 0 
+                        ? Math.round((newStats.totalTasksCompleted / newStats.totalTasksAssigned) * 100)
+                        : 100;
                     
                     const todayStr = format(new Date(), 'yyyy-MM-dd');
                     const todaysTasksList = updatedTasks.filter(t => t.date === todayStr);
