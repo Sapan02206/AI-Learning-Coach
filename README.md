@@ -803,7 +803,7 @@ Whether you're a student, educator, parent, or developer—we invite you to join
 
 **Made with ❤️ and ☕ by passionate developers**
 
-**© 2024 AI Learning Consistency Coach. All rights reserved.**
+**© 2026 AI Learning Consistency Coach. All rights reserved.**
 
 [⬆ Back to Top](#-ai-learning-consistency-coach)
 
