@@ -706,22 +706,124 @@ textarea:focus {
                 
                 console.log('✓ Video session ACTIVE');
                 console.log('✓ Video ID:', videoId);
-                console.log('✓ Iframe URL:', `https://www.youtube.com/embed/${videoId}`);
-                console.log('✓ Video should now be visible!');
+                console.log('✓ Loading YouTube IFrame API for tracking...');
                 
-                // Simple tracking with iframe
+                // Load YouTube IFrame API if not already loaded
+                if (!window.YT) {
+                    const tag = document.createElement('script');
+                    tag.src = 'https://www.youtube.com/iframe_api';
+                    const firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                }
+                
+                // Initialize player when API is ready
+                const initPlayer = () => {
+                    if (!window.YT || !window.YT.Player) {
+                        setTimeout(initPlayer, 100);
+                        return;
+                    }
+                    
+                    console.log('✓ YouTube API loaded, creating player...');
+                    
+                    const player = new window.YT.Player(`youtube-player-${videoId}`, {
+                        videoId: videoId,
+                        playerVars: {
+                            autoplay: 0,
+                            controls: 1,
+                            modestbranding: 1,
+                            rel: 0,
+                            enablejsapi: 1
+                        },
+                        events: {
+                            onReady: (event) => {
+                                console.log('✓ YouTube player ready!');
+                                playerRef.current = event.target;
+                            },
+                            onStateChange: (event) => {
+                                const currentTime = event.target.getCurrentTime();
+                                const duration = event.target.getDuration();
+                                
+                                // Update completion rate
+                                const completion = (currentTime / duration) * 100;
+                                setSessionData(prev => ({
+                                    ...prev,
+                                    completionRate: Math.min(100, completion),
+                                    watchTime: currentTime
+                                }));
+                                
+                                // Track play
+                                if (event.data === window.YT.PlayerState.PLAYING) {
+                                    setSessionData(prev => ({
+                                        ...prev,
+                                        playCount: prev.playCount + 1
+                                    }));
+                                    
+                                    if (lastPositionRef.current > 0) {
+                                        const timeDiff = currentTime - lastPositionRef.current;
+                                        
+                                        // Detect skip forward (> 3 seconds jump)
+                                        if (timeDiff > 3) {
+                                            console.warn(`⚠️ SKIP detected: +${Math.round(timeDiff)}s`);
+                                            setSessionData(prev => ({
+                                                ...prev,
+                                                skipCount: prev.skipCount + 1
+                                            }));
+                                        }
+                                        // Detect rewind (< -3 seconds jump)
+                                        else if (timeDiff < -3) {
+                                            console.warn(`⚠️ REWIND detected: ${Math.round(timeDiff)}s`);
+                                            setSessionData(prev => ({
+                                                ...prev,
+                                                rewindCount: prev.rewindCount + 1
+                                            }));
+                                        }
+                                    }
+                                    
+                                    lastPositionRef.current = currentTime;
+                                }
+                                
+                                // Track pause
+                                if (event.data === window.YT.PlayerState.PAUSED) {
+                                    console.warn('⚠️ PAUSE detected');
+                                    setSessionData(prev => ({
+                                        ...prev,
+                                        pauseCount: prev.pauseCount + 1,
+                                        lastPauseTime: Date.now()
+                                    }));
+                                }
+                            }
+                        }
+                    });
+                };
+                
+                // Wait for API or initialize immediately
+                if (window.YT && window.YT.Player) {
+                    initPlayer();
+                } else {
+                    window.onYouTubeIframeAPIReady = initPlayer;
+                }
+                
+                // Update watch time every second
                 intervalRef.current = setInterval(() => {
-                    const elapsed = (Date.now() - sessionData.startTime) / 1000;
-                    setSessionData(prev => ({
-                        ...prev,
-                        watchTime: elapsed,
-                        completionRate: Math.min(100, (elapsed / 60) * 10) // Estimate based on time
-                    }));
+                    if (playerRef.current && playerRef.current.getCurrentTime) {
+                        const currentTime = playerRef.current.getCurrentTime();
+                        const duration = playerRef.current.getDuration();
+                        const completion = (currentTime / duration) * 100;
+                        
+                        setSessionData(prev => ({
+                            ...prev,
+                            watchTime: currentTime,
+                            completionRate: Math.min(100, completion)
+                        }));
+                    }
                 }, 1000);
                 
                 return () => {
                     if (intervalRef.current) {
                         clearInterval(intervalRef.current);
+                    }
+                    if (playerRef.current && playerRef.current.destroy) {
+                        playerRef.current.destroy();
                     }
                 };
             }, [isActive, videoId]);
@@ -792,20 +894,13 @@ textarea:focus {
                         overflow: 'hidden'
                     } 
                 },
-                    videoId ? React.createElement('iframe', {
-                        key: `iframe-${videoId}`,
-                        src: `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&rel=0&enablejsapi=1`,
+                    videoId ? React.createElement('div', {
+                        id: `youtube-player-${videoId}`,
+                        key: `player-${videoId}`,
                         style: {
                             width: '100%',
-                            height: '100%',
-                            border: 'none',
-                            display: 'block',
-                            backgroundColor: '#000'
-                        },
-                        allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen',
-                        allowFullScreen: true,
-                        title: 'YouTube Video Player',
-                        frameBorder: '0'
+                            height: '100%'
+                        }
                     }) : React.createElement('div', {
                         style: {
                             width: '100%',
