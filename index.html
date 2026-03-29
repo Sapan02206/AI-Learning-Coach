@@ -587,7 +587,10 @@ textarea:focus {
             const [totalPages, setTotalPages] = useState(0);
             const [pageTimeTracking, setPageTimeTracking] = useState({});
             const [sessionStart, setSessionStart] = useState(null);
+            const [pdfDoc, setPdfDoc] = useState(null);
+            const [pageRendering, setPageRendering] = useState(false);
             const fileInputRef = useRef(null);
+            const canvasRef = useRef(null);
             
             const handleFileSelect = (e) => {
                 const selectedFile = e.target.files[0];
@@ -596,12 +599,53 @@ textarea:focus {
                 }
             };
             
+            const renderPage = (pageNum, pdf) => {
+                setPageRendering(true);
+                pdf.getPage(pageNum).then((page) => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+                    
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    
+                    page.render(renderContext).promise.then(() => {
+                        setPageRendering(false);
+                    });
+                });
+            };
+            
             const handleStartSession = () => {
                 if (!file) return;
                 setIsActive(true);
                 setSessionStart(Date.now());
                 setPageTimeTracking({ 1: Date.now() });
                 advancedBehaviorTracker.start();
+                
+                // Load PDF.js
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                script.onload = () => {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    
+                    const fileReader = new FileReader();
+                    fileReader.onload = function() {
+                        const typedarray = new Uint8Array(this.result);
+                        window.pdfjsLib.getDocument(typedarray).promise.then((pdf) => {
+                            setPdfDoc(pdf);
+                            setTotalPages(pdf.numPages);
+                            renderPage(1, pdf);
+                        });
+                    };
+                    fileReader.readAsArrayBuffer(file);
+                };
+                document.body.appendChild(script);
             };
             
             const handleStopSession = () => {
@@ -621,14 +665,19 @@ textarea:focus {
                 setIsActive(false);
                 setFile(null);
                 setCurrentPage(1);
+                setPdfDoc(null);
             };
             
             const handlePageChange = (newPage) => {
+                if (newPage < 1 || newPage > totalPages) return;
                 setPageTimeTracking(prev => ({
                     ...prev,
                     [newPage]: Date.now()
                 }));
                 setCurrentPage(newPage);
+                if (pdfDoc) {
+                    renderPage(newPage, pdfDoc);
+                }
             };
             
             if (!isActive) {
@@ -647,7 +696,7 @@ textarea:focus {
                     React.createElement('button', {
                         onClick: () => fileInputRef.current.click(),
                         style: { width: '100%', padding: '0.75rem', marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', cursor: 'pointer' }
-                    }, file ? file.name : 'Choose PDF File'),
+                    }, file ? `📄 ${file.name}` : '📁 Choose PDF File'),
                     file && React.createElement('button', {
                         onClick: handleStartSession,
                         style: { width: '100%', padding: '0.75rem', background: 'var(--accent-secondary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }
@@ -656,19 +705,25 @@ textarea:focus {
             }
             
             return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--accent-secondary)' } },
-                React.createElement('div', { style: { marginBottom: '1rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
-                    React.createElement('p', { style: { color: 'var(--text-muted)' } }, `PDF Viewer - Page ${currentPage} of ${totalPages || '?'}`)
+                React.createElement('div', { style: { marginBottom: '1rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' } },
+                    React.createElement('canvas', { 
+                        ref: canvasRef,
+                        style: { maxWidth: '100%', height: 'auto', display: pageRendering ? 'none' : 'block' }
+                    }),
+                    pageRendering && React.createElement('p', { style: { color: 'var(--text-muted)' } }, 'Loading page...')
                 ),
-                React.createElement('div', { style: { display: 'flex', gap: '1rem', marginBottom: '1rem' } },
+                React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' } },
                     React.createElement('button', {
-                        onClick: () => handlePageChange(Math.max(1, currentPage - 1)),
+                        onClick: () => handlePageChange(currentPage - 1),
                         disabled: currentPage === 1,
-                        style: { flex: 1, padding: '0.5rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '8px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }
-                    }, 'Previous'),
+                        style: { padding: '0.5rem 1rem', background: currentPage === 1 ? 'rgba(255,255,255,0.05)' : 'var(--accent-secondary)', color: 'white', border: 'none', borderRadius: '8px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }
+                    }, '← Previous'),
+                    React.createElement('span', { style: { fontWeight: 'bold' } }, `Page ${currentPage} of ${totalPages}`),
                     React.createElement('button', {
                         onClick: () => handlePageChange(currentPage + 1),
-                        style: { flex: 1, padding: '0.5rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }
-                    }, 'Next')
+                        disabled: currentPage === totalPages,
+                        style: { padding: '0.5rem 1rem', background: currentPage === totalPages ? 'rgba(255,255,255,0.05)' : 'var(--accent-secondary)', color: 'white', border: 'none', borderRadius: '8px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }
+                    }, 'Next →')
                 ),
                 React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' } },
                     React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
