@@ -520,9 +520,9 @@ textarea:focus {
                         const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
                         
                         if (!response.ok) {
-                            console.warn('Could not fetch video metadata, BLOCKING by default for safety');
+                            console.warn('Could not fetch video metadata, ALLOWING by default (benefit of doubt)');
                             setIsValidating(false);
-                            return false; // BLOCK if can't validate (safer approach)
+                            return true; // ALLOW if can't validate (give benefit of doubt)
                         }
                         
                         const data = await response.json();
@@ -542,29 +542,31 @@ textarea:focus {
                             return false;
                         }
                         
-                        // SECOND: REQUIRE educational keywords (MUST have at least one)
+                        // SECOND: Check for educational keywords (ALLOW if found)
                         const hasEducational = educationalKeywords.some(keyword => 
                             title.includes(keyword) || author.includes(keyword)
                         );
                         
-                        if (!hasEducational) {
-                            console.warn('❌ No educational keywords found - BLOCKING');
+                        if (hasEducational) {
+                            console.log('✓ Educational keywords found - ALLOWING');
                             setIsValidating(false);
-                            return false;
+                            return true;
                         }
                         
-                        console.log('✓ Content validated as educational');
+                        // THIRD: If no clear indicators, ALLOW by default (benefit of doubt)
+                        // Only block if explicitly non-educational
+                        console.log('⚠️ No clear educational keywords, but no entertainment keywords either - ALLOWING');
                         setIsValidating(false);
                         return true;
                     } catch (fetchError) {
-                        console.warn('Fetch error, BLOCKING video for safety:', fetchError);
+                        console.warn('Fetch error, ALLOWING video (benefit of doubt):', fetchError);
                         setIsValidating(false);
-                        return false; // BLOCK if validation fails (safer)
+                        return true; // ALLOW if validation fails (give benefit of doubt)
                     }
                 } catch (error) {
                     console.error('Validation error:', error);
                     setIsValidating(false);
-                    return false; // BLOCK by default if validation fails (safer)
+                    return true; // ALLOW by default if validation fails (benefit of doubt)
                 }
             };
             
@@ -584,8 +586,8 @@ textarea:focus {
                 console.log('🔍 Validation result:', isValid ? 'ALLOWED' : 'BLOCKED');
                 
                 if (!isValid) {
-                    setValidationError('⚠️ NON-EDUCATIONAL CONTENT BLOCKED!');
-                    alert('🚨 NON-EDUCATIONAL CONTENT DETECTED!\n\nThis video is not educational content.\n\nOnly educational videos are allowed:\n- Tutorials\n- Lectures\n- Courses\n- Programming/Coding\n- Science/Math\n- Study materials\n\nYour trust score will be reduced by 10%.');
+                    setValidationError('⚠️ ENTERTAINMENT CONTENT BLOCKED!');
+                    alert('🚨 ENTERTAINMENT CONTENT DETECTED!\n\nThis video contains entertainment keywords (music, gaming, vlog, etc.).\n\nOnly educational content is allowed:\n- Tutorials & Lectures\n- Courses & Training\n- Programming/Coding\n- Science/Math/Engineering\n- Study materials\n\nYour trust score will be reduced by 10%.');
                     
                     // Apply penalty
                     const currentStats = getStats();
@@ -595,7 +597,7 @@ textarea:focus {
                     
                     setSessionData(prev => ({ ...prev, cheatingAttempts: prev.cheatingAttempts + 1 }));
                     
-                    console.error('❌ VIDEO BLOCKED - Non-educational content');
+                    console.error('❌ VIDEO BLOCKED - Entertainment content detected');
                     return;
                 }
                 
@@ -804,7 +806,7 @@ textarea:focus {
                         style: { width: '100%', padding: '0.75rem', marginBottom: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
                     }),
                     React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' } }, 
-                        '⚠️ Only educational content allowed. Non-educational videos will reduce your trust score by 10%.'
+                        '✓ Educational videos allowed. Only entertainment content (music, gaming, vlogs, etc.) will be blocked.'
                     ),
                     React.createElement('button', {
                         onClick: handleStartSession,
