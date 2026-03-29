@@ -450,6 +450,9 @@ textarea:focus {
             const [isFullscreen, setIsFullscreen] = useState(false);
             const [isValidating, setIsValidating] = useState(false);
             const [validationError, setValidationError] = useState('');
+            const [lastActivityTime, setLastActivityTime] = useState(Date.now());
+            const [inactiveSeconds, setInactiveSeconds] = useState(0);
+            const [showInactiveWarning, setShowInactiveWarning] = useState(false);
             const [sessionData, setSessionData] = useState({
                 playCount: 0,
                 pauseCount: 0,
@@ -466,6 +469,7 @@ textarea:focus {
             });
             const playerRef = useRef(null);
             const intervalRef = useRef(null);
+            const inactivityTimerRef = useRef(null);
             const containerRef = useRef(null);
             const lastPositionRef = useRef(0);
             const iframeRef = useRef(null);
@@ -747,6 +751,33 @@ textarea:focus {
                 };
             }, [isActive, videoId]);
             
+            // Inactivity monitoring for video session
+            useEffect(() => {
+                if (!isActive || !videoId) return;
+                
+                inactivityTimerRef.current = setInterval(() => {
+                    const timeSinceLastActivity = Date.now() - lastActivityTime;
+                    const tabSwitched = advancedBehaviorTracker.sessionData.focusLost > 0;
+                    
+                    // Only show warning if tab switched and not back for 2+ minutes
+                    if (timeSinceLastActivity > 120000 && tabSwitched) {
+                        setInactiveSeconds(Math.floor(timeSinceLastActivity / 1000));
+                        setShowInactiveWarning(true);
+                    } else {
+                        setShowInactiveWarning(false);
+                        setInactiveSeconds(0);
+                    }
+                }, 1000);
+                
+                return () => {
+                    if (inactivityTimerRef.current) {
+                        clearInterval(inactivityTimerRef.current);
+                    }
+                };
+            }, [isActive, videoId, lastActivityTime]);
+                };
+            }, [isActive, videoId]);
+            
             if (!isActive) {
                 return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem' } },
                     React.createElement('h3', { style: { marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } },
@@ -877,6 +908,27 @@ textarea:focus {
                         React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: advancedBehaviorTracker.sessionData.focusLost > 5 ? 'var(--danger)' : 'var(--text-main)' } }, advancedBehaviorTracker.sessionData.focusLost)
                     )
                 ),
+                !isFullscreen && showInactiveWarning && React.createElement('div', {
+                    style: {
+                        marginBottom: '1rem',
+                        padding: '1rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid var(--danger)',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        animation: 'pulse-glow 1s infinite'
+                    }
+                },
+                    React.createElement(EyeOff, { size: 20, color: 'var(--danger)' }),
+                    React.createElement('div', null,
+                        React.createElement('p', { style: { margin: 0, fontWeight: 'bold', color: 'var(--danger)' } }, '⚠️ Inactivity Detected'),
+                        React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } },
+                            `Tab switched for ${Math.floor(inactiveSeconds / 60)} minutes. Your trust score is decreasing.`
+                        )
+                    )
+                ),
                 !isFullscreen && React.createElement('button', {
                     onClick: handleStopSession,
                     style: { width: '100%', padding: '0.75rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }
@@ -919,11 +971,15 @@ textarea:focus {
             const [rapidScrollCount, setRapidScrollCount] = useState(0);
             const [lastScrollTime, setLastScrollTime] = useState(Date.now());
             const [scrollSpeed, setScrollSpeed] = useState(0);
+            const [lastActivityTime, setLastActivityTime] = useState(Date.now());
+            const [inactiveSeconds, setInactiveSeconds] = useState(0);
+            const [showInactiveWarning, setShowInactiveWarning] = useState(false);
             const fileInputRef = useRef(null);
             const canvasRef = useRef(null);
             const containerRef = useRef(null);
             const pageTimerRef = useRef(null);
             const scrollTimerRef = useRef(null);
+            const inactivityTimerRef = useRef(null);
             const lastScrollY = useRef(0);
             
             const handleFileSelect = (e) => {
@@ -1211,8 +1267,47 @@ textarea:focus {
                 };
             }, [isActive, currentPage, lastScrollTime]);
             
+            // Inactivity monitoring for PDF session
+            useEffect(() => {
+                if (!isActive) return;
+                
+                inactivityTimerRef.current = setInterval(() => {
+                    const timeSinceLastActivity = Date.now() - lastActivityTime;
+                    const inactiveMinutes = Math.floor(timeSinceLastActivity / 60000);
+                    
+                    // Only show warning if:
+                    // 1. No page change for 2+ minutes AND on same page too long (10+ mins)
+                    // 2. OR tab switched and not back for 2+ minutes
+                    const tooLongOnSamePage = timeOnCurrentPage > 600; // 10 minutes on same page
+                    const tabSwitched = advancedBehaviorTracker.sessionData.focusLost > 0;
+                    
+                    if (timeSinceLastActivity > 120000 && (tooLongOnSamePage || tabSwitched)) {
+                        setInactiveSeconds(Math.floor(timeSinceLastActivity / 1000));
+                        setShowInactiveWarning(true);
+                    } else {
+                        setShowInactiveWarning(false);
+                        setInactiveSeconds(0);
+                    }
+                }, 1000);
+                
+                return () => {
+                    if (inactivityTimerRef.current) {
+                        clearInterval(inactivityTimerRef.current);
+                    }
+                };
+            }, [isActive, lastActivityTime, timeOnCurrentPage]);
+            
+            // Track user activity
+            const trackActivity = () => {
+                setLastActivityTime(Date.now());
+                setShowInactiveWarning(false);
+                setInactiveSeconds(0);
+            };
+            
             const handleHighlight = () => {
                 if (!pdfDoc) return;
+                
+                trackActivity(); // Track activity
                 
                 const now = Date.now();
                 const timeSincePageLoad = now - pageStartTime;
@@ -1242,6 +1337,8 @@ textarea:focus {
             
             const handlePageChange = (newPage) => {
                 if (newPage < 1 || newPage > totalPages) return;
+                
+                trackActivity(); // Track activity
                 
                 const now = Date.now();
                 const timeOnPage = now - pageStartTime;
@@ -1302,7 +1399,7 @@ textarea:focus {
             
             return React.createElement('div', { 
                 ref: containerRef,
-                className: 'glass-panel', 
+                className: 'glass-panel',
                 style: { 
                     padding: isFullscreen ? '0' : '1.5rem', 
                     marginBottom: '1.5rem', 
@@ -1425,6 +1522,29 @@ textarea:focus {
                             transition: 'all 0.2s'
                         }
                     }, isHighlighting ? '✓ Highlighted!' : '🖍 Highlight Important')
+                ),
+                !isFullscreen && showInactiveWarning && React.createElement('div', {
+                    style: {
+                        marginBottom: '1rem',
+                        padding: '1rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid var(--danger)',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        animation: 'pulse-glow 1s infinite'
+                    }
+                },
+                    React.createElement(EyeOff, { size: 20, color: 'var(--danger)' }),
+                    React.createElement('div', null,
+                        React.createElement('p', { style: { margin: 0, fontWeight: 'bold', color: 'var(--danger)' } }, '⚠️ Inactivity Detected'),
+                        React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } },
+                            timeOnCurrentPage > 600 
+                                ? `You've been on the same page for ${Math.floor(timeOnCurrentPage / 60)} minutes. Change pages to continue learning.`
+                                : `Tab switched for ${Math.floor(inactiveSeconds / 60)} minutes. Your trust score is decreasing.`
+                        )
+                    )
                 ),
                 !isFullscreen && React.createElement('button', {
                     onClick: handleStopSession,
