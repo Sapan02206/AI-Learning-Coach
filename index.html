@@ -197,14 +197,32 @@ textarea:focus {
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@3.0.0/index.min.js"></script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef } = React;
-        const { format, addDays, differenceInDays, subDays, startOfDay, parseISO, isBefore } = dateFns;
+        
+        // Date utility functions (replacing date-fns)
+        const format = (date, fmt) => {
+            if (!date) return "";
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            if (fmt === "yyyy-MM-dd") return `${year}-${month}-${day}`;
+            if (fmt === "EEE") return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+            if (fmt === "d") return String(d.getDate());
+            if (fmt === "EEEE") return ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()];
+            return d.toISOString();
+        };
+        const addDays = (date, days) => new Date(new Date(date).getTime() + days * 86400000);
+        const differenceInDays = (d1, d2) => Math.floor((new Date(d1) - new Date(d2)) / 86400000);
+        const subDays = (date, days) => new Date(new Date(date).getTime() - days * 86400000);
+        const startOfDay = (date) => { const d = new Date(date); d.setHours(0,0,0,0); return d; };
+        const parseISO = (str) => new Date(str);
+        const isBefore = (d1, d2) => new Date(d1) < new Date(d2);
         
         // Lucide Icons
         const Brain = lucide.Brain;
