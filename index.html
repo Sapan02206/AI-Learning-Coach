@@ -204,9 +204,6 @@ textarea:focus {
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@0.300.0/dist/umd/lucide.js"></script>
-    
     <!-- Babel for JSX transformation -->
     <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
     
@@ -233,32 +230,47 @@ textarea:focus {
         const parseISO = (str) => new Date(str);
         const isBefore = (d1, d2) => new Date(d1) < new Date(d2);
         
-        // Lucide Icons
-        const Brain = lucide.Brain;
-        const Shield = lucide.Shield;
-        const Flame = lucide.Flame;
-        const Target = lucide.Target;
-        const Trophy = lucide.Trophy;
-        const ShieldAlert = lucide.ShieldAlert;
-        const ShieldCheck = lucide.ShieldCheck;
-        const Activity = lucide.Activity;
-        const CheckSquare = lucide.CheckSquare;
-        const Square = lucide.Square;
-        const PlayCircle = lucide.PlayCircle;
-        const CheckCircle2 = lucide.CheckCircle2;
-        const Circle = lucide.Circle;
-        const Sparkles = lucide.Sparkles;
-        const Play = lucide.Play;
-        const Pause = lucide.Pause;
-        const SquareIcon = lucide.Square;
-        const Clock = lucide.Clock;
-        const AlertTriangle = lucide.AlertTriangle;
-        const EyeOff = lucide.EyeOff;
-        const Calendar = lucide.Calendar;
-        const TrendingUp = lucide.TrendingUp;
-        const TrendingDown = lucide.TrendingDown;
-        const Zap = lucide.Zap;
-        const AlertCircle = lucide.AlertCircle;
+        // Simple SVG Icons (replacing Lucide)
+        const createSvgIcon = (path, viewBox = "0 0 24 24") => (props) => {
+            const { size = 24, color = "currentColor", ...rest } = props || {};
+            return React.createElement('svg', {
+                width: size,
+                height: size,
+                viewBox,
+                fill: "none",
+                stroke: color,
+                strokeWidth: 2,
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                ...rest
+            }, typeof path === 'string' ? React.createElement('path', { d: path }) : path);
+        };
+        
+        const Brain = createSvgIcon("M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4 M9 12h.01 M15 12h.01");
+        const Shield = createSvgIcon("M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z");
+        const Flame = createSvgIcon("M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z");
+        const Target = createSvgIcon("M12 12m-10 0a10 10 0 1 0 20 0a10 10 0 1 0 -20 0 M12 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0 M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0");
+        const Trophy = createSvgIcon("M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 19h16 M8 19v-4 M16 19v-4 M12 19v-9 M12 10a4 4 0 0 1-4-4V4h8v2a4 4 0 0 1-4 4z");
+        const ShieldAlert = createSvgIcon("M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M12 8v4 M12 16h.01");
+        const ShieldCheck = createSvgIcon("M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4");
+        const Activity = createSvgIcon("M22 12h-4l-3 9L9 3l-3 9H2");
+        const CheckSquare = createSvgIcon("M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11");
+        const Square = createSvgIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z");
+        const PlayCircle = createSvgIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M10 8l6 4-6 4V8z");
+        const CheckCircle2 = createSvgIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M9 12l2 2 4-4");
+        const Circle = createSvgIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z");
+        const Sparkles = createSvgIcon("M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z");
+        const Play = createSvgIcon("M5 3l14 9-14 9V3z");
+        const Pause = createSvgIcon("M6 4h4v16H6V4zm8 0h4v16h-4V4z");
+        const SquareIcon = Square;
+        const Clock = createSvgIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2");
+        const AlertTriangle = createSvgIcon("M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01");
+        const EyeOff = createSvgIcon("M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24 M1 1l22 22");
+        const Calendar = createSvgIcon("M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z");
+        const TrendingUp = createSvgIcon("M23 6l-9.5 9.5-5-5L1 18 M17 6h6v6");
+        const TrendingDown = createSvgIcon("M23 18l-9.5-9.5-5 5L1 6 M17 18h6v-6");
+        const Zap = createSvgIcon("M13 2L3 14h9l-1 8 10-12h-9l1-8z");
+        const AlertCircle = createSvgIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 8v4 M12 16h.01");
         
         // Storage Service
         const PLAN_KEY = 'ai_coach_plan';
