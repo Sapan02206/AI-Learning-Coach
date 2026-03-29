@@ -695,13 +695,14 @@ textarea:focus {
                 console.log('✓ Video ID:', videoId);
                 console.log('✓ Video should now be visible!');
                 
-                // Track watch time and estimate completion
+                // Simple watch time tracking
                 intervalRef.current = setInterval(() => {
                     const elapsed = (Date.now() - sessionData.startTime) / 1000;
                     setSessionData(prev => ({
                         ...prev,
                         watchTime: elapsed,
-                        completionRate: Math.min(100, (elapsed / 60) * 10) // Rough estimate
+                        completionRate: Math.min(100, (elapsed / 60) * 10), // Rough estimate
+                        _updateTrigger: Date.now() // Force re-render
                     }));
                 }, 1000);
                 
@@ -826,20 +827,20 @@ textarea:focus {
                 ),
                 !isFullscreen && React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem', marginBottom: '1rem' } },
                     React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
-                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Completion'),
-                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-primary)' } }, `${Math.round(sessionData.completionRate)}%`)
+                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Watch Time'),
+                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-primary)' } }, `${Math.floor(sessionData.watchTime / 60)}m ${Math.floor(sessionData.watchTime % 60)}s`)
                     ),
                     React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
-                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Skips'),
-                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: sessionData.skipCount > 5 ? 'var(--danger)' : 'var(--text-main)' } }, sessionData.skipCount)
+                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Mouse Activity'),
+                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: advancedBehaviorTracker.sessionData.mouseMovements > 50 ? 'var(--accent-secondary)' : advancedBehaviorTracker.sessionData.mouseMovements > 20 ? 'var(--warning)' : 'var(--danger)' } }, advancedBehaviorTracker.sessionData.mouseMovements)
                     ),
                     React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
-                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Rewinds'),
-                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold' } }, sessionData.rewindCount)
+                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Interactions'),
+                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold' } }, advancedBehaviorTracker.sessionData.clickEvents + advancedBehaviorTracker.sessionData.scrollEvents)
                     ),
                     React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
-                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Pauses'),
-                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: sessionData.pauseCount > 10 ? 'var(--warning)' : 'var(--text-main)' } }, sessionData.pauseCount)
+                        React.createElement('p', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Tab Switches'),
+                        React.createElement('p', { style: { fontSize: '1.1rem', fontWeight: 'bold', color: advancedBehaviorTracker.sessionData.focusLost > 5 ? 'var(--danger)' : 'var(--text-main)' } }, advancedBehaviorTracker.sessionData.focusLost)
                     )
                 ),
                 !isFullscreen && React.createElement('button', {
