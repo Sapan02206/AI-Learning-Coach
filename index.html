@@ -583,17 +583,13 @@ textarea:focus {
                 const sessionMinutes = sessionDuration / 60000;
                 const sessionSeconds = sessionDuration / 1000;
                 
-                // CRITICAL: Analyze video watching behavior
+                // CRITICAL: Analyze video watching behavior based on what we CAN track
                 const isTooShort = sessionDuration < 30000; // Less than 30 seconds
                 const isVeryShort = sessionDuration < 60000; // Less than 1 minute
-                const tooManySkips = sessionData.skipCount > 5;
-                const excessiveSkips = sessionData.skipCount > 10;
-                const tooManyPauses = sessionData.pauseCount > 10;
-                const excessivePauses = sessionData.pauseCount > 20;
                 const tooManyTabSwitches = behaviorData.focusLost > 5;
-                const lowCompletion = sessionData.completionRate < 20;
-                const veryLowCompletion = sessionData.completionRate < 10;
                 const lowEngagement = behaviorData.mouseMovements < 20 && sessionSeconds > 60;
+                const veryLowEngagement = behaviorData.mouseMovements < 10 && behaviorData.scrollEvents < 5 && sessionSeconds > 60;
+                const noInteraction = behaviorData.mouseMovements < 5 && behaviorData.scrollEvents < 3 && behaviorData.clickEvents < 2;
                 
                 // START WITH BASE SCORE OF 100
                 let videoQualityScore = 100;
@@ -607,28 +603,15 @@ textarea:focus {
                     console.warn('⚠️ Very short video session (< 1 min)! -60 points');
                 } else {
                     // Apply penalties for bad watching behavior
-                    if (veryLowCompletion) {
+                    if (noInteraction) {
                         videoQualityScore = Math.max(0, videoQualityScore - 50);
-                        console.warn('⚠️ Very low completion (< 10%)! -50 points');
-                    } else if (lowCompletion) {
-                        videoQualityScore = Math.max(0, videoQualityScore - 30);
-                        console.warn('⚠️ Low completion (< 20%)! -30 points');
-                    }
-                    
-                    if (excessiveSkips) {
-                        videoQualityScore = Math.max(0, videoQualityScore - 40);
-                        console.warn(`⚠️ Excessive skipping (${sessionData.skipCount} skips)! -40 points`);
-                    } else if (tooManySkips) {
-                        videoQualityScore = Math.max(0, videoQualityScore - (sessionData.skipCount * 5));
-                        console.warn(`⚠️ Too many skips (${sessionData.skipCount})! -${sessionData.skipCount * 5} points`);
-                    }
-                    
-                    if (excessivePauses) {
-                        videoQualityScore = Math.max(0, videoQualityScore - 30);
-                        console.warn(`⚠️ Excessive pausing (${sessionData.pauseCount} pauses)! -30 points`);
-                    } else if (tooManyPauses) {
-                        videoQualityScore = Math.max(0, videoQualityScore - (sessionData.pauseCount * 2));
-                        console.warn(`⚠️ Too many pauses (${sessionData.pauseCount})! -${sessionData.pauseCount * 2} points`);
+                        console.warn('⚠️ No interaction detected! Likely not watching. -50 points');
+                    } else if (veryLowEngagement) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 35);
+                        console.warn('⚠️ Very low engagement (minimal interaction)! -35 points');
+                    } else if (lowEngagement) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 20);
+                        console.warn('⚠️ Low engagement! -20 points');
                     }
                     
                     if (tooManyTabSwitches) {
@@ -636,15 +619,19 @@ textarea:focus {
                         console.warn(`⚠️ Too many tab switches (${behaviorData.focusLost})! -25 points`);
                     }
                     
-                    if (lowEngagement) {
-                        videoQualityScore = Math.max(0, videoQualityScore - 20);
-                        console.warn('⚠️ Very low engagement (minimal interaction)! -20 points');
+                    // Penalty for very short sessions even if > 1 min
+                    if (sessionMinutes < 2) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 30);
+                        console.warn('⚠️ Session < 2 minutes! -30 points');
+                    } else if (sessionMinutes < 3) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 15);
+                        console.warn('⚠️ Session < 3 minutes! -15 points');
                     }
                     
-                    // Penalty for too many rewinds (might indicate not paying attention)
-                    if (sessionData.rewindCount > 10) {
-                        videoQualityScore = Math.max(0, videoQualityScore - 15);
-                        console.warn(`⚠️ Excessive rewinding (${sessionData.rewindCount})! -15 points`);
+                    // Reward longer sessions with good engagement
+                    if (sessionMinutes >= 5 && behaviorData.mouseMovements > 50) {
+                        videoQualityScore = Math.min(100, videoQualityScore + 10);
+                        console.log('✓ Good session length and engagement! +10 points');
                     }
                 }
                 
@@ -656,15 +643,15 @@ textarea:focus {
                     endTime: Date.now(),
                     sessionDuration,
                     sessionMinutes: Math.round(sessionMinutes * 100) / 100,
-                    totalSkips: sessionData.skipCount,
-                    totalRewinds: sessionData.rewindCount,
-                    pauseDuration: sessionData.pauseDuration,
+                    totalSkips: 0, // Can't track with iframe
+                    totalRewinds: 0, // Can't track with iframe
+                    pauseDuration: 0, // Can't track with iframe
                     videoQualityScore: Math.round(videoQualityScore),
                     isTooShort,
                     isVeryShort,
-                    tooManySkips,
-                    tooManyPauses,
-                    tooManyTabSwitches
+                    tooManyTabSwitches,
+                    lowEngagement,
+                    noInteraction
                 };
                 onSessionComplete(finalData);
                 setIsActive(false);
@@ -706,124 +693,21 @@ textarea:focus {
                 
                 console.log('✓ Video session ACTIVE');
                 console.log('✓ Video ID:', videoId);
-                console.log('✓ Loading YouTube IFrame API for tracking...');
+                console.log('✓ Video should now be visible!');
                 
-                // Load YouTube IFrame API if not already loaded
-                if (!window.YT) {
-                    const tag = document.createElement('script');
-                    tag.src = 'https://www.youtube.com/iframe_api';
-                    const firstScriptTag = document.getElementsByTagName('script')[0];
-                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                }
-                
-                // Initialize player when API is ready
-                const initPlayer = () => {
-                    if (!window.YT || !window.YT.Player) {
-                        setTimeout(initPlayer, 100);
-                        return;
-                    }
-                    
-                    console.log('✓ YouTube API loaded, creating player...');
-                    
-                    const player = new window.YT.Player(`youtube-player-${videoId}`, {
-                        videoId: videoId,
-                        playerVars: {
-                            autoplay: 0,
-                            controls: 1,
-                            modestbranding: 1,
-                            rel: 0,
-                            enablejsapi: 1
-                        },
-                        events: {
-                            onReady: (event) => {
-                                console.log('✓ YouTube player ready!');
-                                playerRef.current = event.target;
-                            },
-                            onStateChange: (event) => {
-                                const currentTime = event.target.getCurrentTime();
-                                const duration = event.target.getDuration();
-                                
-                                // Update completion rate
-                                const completion = (currentTime / duration) * 100;
-                                setSessionData(prev => ({
-                                    ...prev,
-                                    completionRate: Math.min(100, completion),
-                                    watchTime: currentTime
-                                }));
-                                
-                                // Track play
-                                if (event.data === window.YT.PlayerState.PLAYING) {
-                                    setSessionData(prev => ({
-                                        ...prev,
-                                        playCount: prev.playCount + 1
-                                    }));
-                                    
-                                    if (lastPositionRef.current > 0) {
-                                        const timeDiff = currentTime - lastPositionRef.current;
-                                        
-                                        // Detect skip forward (> 3 seconds jump)
-                                        if (timeDiff > 3) {
-                                            console.warn(`⚠️ SKIP detected: +${Math.round(timeDiff)}s`);
-                                            setSessionData(prev => ({
-                                                ...prev,
-                                                skipCount: prev.skipCount + 1
-                                            }));
-                                        }
-                                        // Detect rewind (< -3 seconds jump)
-                                        else if (timeDiff < -3) {
-                                            console.warn(`⚠️ REWIND detected: ${Math.round(timeDiff)}s`);
-                                            setSessionData(prev => ({
-                                                ...prev,
-                                                rewindCount: prev.rewindCount + 1
-                                            }));
-                                        }
-                                    }
-                                    
-                                    lastPositionRef.current = currentTime;
-                                }
-                                
-                                // Track pause
-                                if (event.data === window.YT.PlayerState.PAUSED) {
-                                    console.warn('⚠️ PAUSE detected');
-                                    setSessionData(prev => ({
-                                        ...prev,
-                                        pauseCount: prev.pauseCount + 1,
-                                        lastPauseTime: Date.now()
-                                    }));
-                                }
-                            }
-                        }
-                    });
-                };
-                
-                // Wait for API or initialize immediately
-                if (window.YT && window.YT.Player) {
-                    initPlayer();
-                } else {
-                    window.onYouTubeIframeAPIReady = initPlayer;
-                }
-                
-                // Update watch time every second
+                // Track watch time and estimate completion
                 intervalRef.current = setInterval(() => {
-                    if (playerRef.current && playerRef.current.getCurrentTime) {
-                        const currentTime = playerRef.current.getCurrentTime();
-                        const duration = playerRef.current.getDuration();
-                        const completion = (currentTime / duration) * 100;
-                        
-                        setSessionData(prev => ({
-                            ...prev,
-                            watchTime: currentTime,
-                            completionRate: Math.min(100, completion)
-                        }));
-                    }
+                    const elapsed = (Date.now() - sessionData.startTime) / 1000;
+                    setSessionData(prev => ({
+                        ...prev,
+                        watchTime: elapsed,
+                        completionRate: Math.min(100, (elapsed / 60) * 10) // Rough estimate
+                    }));
                 }, 1000);
                 
                 return () => {
                     if (intervalRef.current) {
                         clearInterval(intervalRef.current);
-                    }
-                    if (playerRef.current && playerRef.current.destroy) {
-                        playerRef.current.destroy();
                     }
                 };
             }, [isActive, videoId]);
@@ -894,13 +778,20 @@ textarea:focus {
                         overflow: 'hidden'
                     } 
                 },
-                    videoId ? React.createElement('div', {
-                        id: `youtube-player-${videoId}`,
-                        key: `player-${videoId}`,
+                    videoId ? React.createElement('iframe', {
+                        key: `iframe-${videoId}`,
+                        src: `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&rel=0`,
                         style: {
                             width: '100%',
-                            height: '100%'
-                        }
+                            height: '100%',
+                            border: 'none',
+                            display: 'block',
+                            backgroundColor: '#000'
+                        },
+                        allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen',
+                        allowFullScreen: true,
+                        title: 'YouTube Video Player',
+                        frameBorder: '0'
                     }) : React.createElement('div', {
                         style: {
                             width: '100%',
