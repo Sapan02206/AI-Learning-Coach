@@ -486,56 +486,164 @@ textarea:focus {
                 try {
                     console.log('Validating video content for ID:', videoId);
                     
-                    // Educational keywords - Strong indicators of educational content
+                    // Educational keywords - Comprehensive list for better identification
                     const educationalKeywords = [
+                        // Core educational terms
                         'tutorial', 'lecture', 'course', 'learn', 'education', 'study',
                         'lesson', 'teaching', 'training', 'guide', 'how to', 'explained',
-                        'programming', 'math', 'science', 'history', 'language', 'coding',
-                        'algorithm', 'data structure', 'physics', 'chemistry', 'biology',
-                        'calculus', 'algebra', 'geometry', 'statistics', 'computer',
-                        'engineering', 'medical', 'anatomy', 'philosophy', 'economics',
-                        'finance', 'accounting', 'business', 'marketing', 'design',
-                        'development', 'software', 'hardware', 'network', 'database',
-                        'machine learning', 'artificial intelligence', 'data science',
-                        'web development', 'app development', 'python', 'java', 'javascript',
-                        'react', 'angular', 'vue', 'node', 'sql', 'css', 'html',
-                        'exam', 'test', 'preparation', 'interview', 'career', 'skill',
+                        'explanation', 'understanding', 'knowledge', 'learning',
+                        
+                        // Academic structure
                         'class', 'workshop', 'seminar', 'webinar', 'bootcamp', 'academy',
-                        'university', 'college', 'school', 'professor', 'instructor', 'teacher',
-                        'chapter', 'module', 'unit', 'assignment', 'homework', 'project',
-                        'theory', 'concept', 'principle', 'fundamental', 'basics', 'advanced',
-                        'beginner', 'intermediate', 'expert', 'certification', 'degree'
+                        'university', 'college', 'school', 'institute', 'training center',
+                        'chapter', 'ch', 'module', 'unit', 'section', 'part',
+                        'assignment', 'homework', 'project', 'exercise', 'practice',
+                        'exam', 'test', 'quiz', 'assessment', 'preparation', 'revision',
+                        
+                        // Instructors & roles
+                        'professor', 'instructor', 'teacher', 'educator', 'mentor', 'coach',
+                        'tutor', 'trainer', 'lecturer', 'faculty', 'expert',
+                        
+                        // Learning levels
+                        'beginner', 'intermediate', 'advanced', 'expert', 'master',
+                        'basics', 'fundamentals', 'introduction', 'intro', 'getting started',
+                        'theory', 'concept', 'principle', 'foundation',
+                        
+                        // Credentials
+                        'certification', 'certificate', 'degree', 'diploma', 'credential',
+                        
+                        // Subjects - STEM
+                        'programming', 'coding', 'code', 'development', 'developer',
+                        'math', 'mathematics', 'maths', 'calculus', 'algebra', 'geometry',
+                        'statistics', 'probability', 'trigonometry', 'arithmetic',
+                        'science', 'physics', 'chemistry', 'biology', 'astronomy',
+                        'computer', 'computing', 'technology', 'tech', 'it',
+                        'engineering', 'engineer', 'mechanical', 'electrical', 'civil',
+                        'algorithm', 'data structure', 'database', 'sql', 'nosql',
+                        
+                        // Programming languages & frameworks
+                        'python', 'java', 'javascript', 'c++', 'c#', 'php', 'ruby',
+                        'react', 'angular', 'vue', 'node', 'nodejs', 'express',
+                        'django', 'flask', 'spring', 'laravel', 'rails',
+                        'html', 'css', 'sass', 'scss', 'bootstrap', 'tailwind',
+                        
+                        // Tech topics
+                        'machine learning', 'ml', 'artificial intelligence', 'ai',
+                        'data science', 'data analysis', 'analytics', 'big data',
+                        'web development', 'web dev', 'app development', 'mobile dev',
+                        'software', 'hardware', 'network', 'networking', 'security',
+                        'cybersecurity', 'cloud', 'aws', 'azure', 'devops', 'docker',
+                        
+                        // Subjects - Humanities & Business
+                        'history', 'geography', 'literature', 'language', 'english',
+                        'philosophy', 'psychology', 'sociology', 'anthropology',
+                        'economics', 'finance', 'accounting', 'business', 'management',
+                        'marketing', 'sales', 'entrepreneurship', 'startup',
+                        
+                        // Medical & Health
+                        'medical', 'medicine', 'anatomy', 'physiology', 'biology',
+                        'nursing', 'healthcare', 'health', 'pharmacy',
+                        
+                        // Professional development
+                        'interview', 'job interview', 'career', 'skill', 'skills',
+                        'professional', 'workplace', 'resume', 'cv',
+                        
+                        // Subject-specific
+                        'subject', 'topic', 'syllabus', 'curriculum', 'textbook'
                     ];
                     
-                    // Entertainment keywords - Strong indicators of non-educational content
+                    // Entertainment keywords - Strict blocking list
                     const entertainmentKeywords = [
-                        'music video', 'official video', 'lyric video', 'audio', 'song',
-                        'movie', 'trailer', 'teaser', 'clip', 'scene', 'film',
-                        'gameplay', 'gaming', 'let\'s play', 'walkthrough', 'playthrough',
-                        'funny', 'meme', 'comedy', 'laugh', 'hilarious', 'roast',
-                        'vlog', 'daily vlog', 'prank', 'challenge', 'tag',
-                        'tmkoc', 'taarak mehta', 'serial', 'episode', 'tv show',
-                        'drama', 'soap opera', 'reality show', 'talent show',
-                        'cartoon', 'anime', 'animated', 'kids show',
-                        'bollywood', 'hollywood', 'celebrity', 'gossip',
-                        'dance', 'party', 'dj', 'remix', 'mashup',
-                        'wedding', 'birthday', 'celebration', 'event',
-                        'travel vlog', 'vacation', 'trip', 'tour',
-                        'food vlog', 'mukbang', 'eating', 'tasting',
-                        'sports', 'cricket', 'football', 'match', 'highlights',
-                        'goals', 'best moments', 'funny moments', 'fails',
-                        'compilation', 'reaction', 'reacting to', 'responds to',
-                        'unboxing', 'haul', 'shopping', 'review',
-                        'makeup', 'beauty', 'fashion', 'outfit', 'styling',
-                        'lifestyle', 'routine', 'day in life', 'behind the scenes',
-                        'podcast', 'interview', 'talk show', 'chat'
+                        // Music
+                        'music video', 'official video', 'lyric video', 'lyrics', 'audio',
+                        'song', 'music', 'album', 'single', 'track', 'beat', 'instrumental',
+                        'cover song', 'acoustic', 'live performance', 'concert',
+                        
+                        // Movies & TV
+                        'movie', 'film', 'cinema', 'trailer', 'teaser', 'clip', 'scene',
+                        'full movie', 'hd movie', 'bollywood', 'hollywood', 'tollywood',
+                        'serial', 'episode', 'tv show', 'web series', 'netflix', 'prime video',
+                        'drama', 'soap opera', 'reality show', 'talent show', 'tv serial',
+                        
+                        // Gaming
+                        'gameplay', 'gaming', 'game', 'let\'s play', 'walkthrough', 'playthrough',
+                        'gaming video', 'game review', 'gamer', 'stream', 'streaming',
+                        'pubg', 'fortnite', 'minecraft', 'cod', 'gta', 'free fire',
+                        
+                        // Comedy & Entertainment
+                        'funny', 'funny video', 'comedy', 'comedian', 'stand up',
+                        'meme', 'memes', 'laugh', 'hilarious', 'roast', 'roasting',
+                        'joke', 'jokes', 'humor', 'humour', 'parody', 'spoof',
+                        
+                        // Vlogs & Lifestyle
+                        'vlog', 'vlogger', 'daily vlog', 'vlogging', 'my day',
+                        'day in life', 'day in my life', 'routine', 'morning routine',
+                        'lifestyle', 'lifestyle vlog', 'behind the scenes', 'bts',
+                        
+                        // Pranks & Challenges
+                        'prank', 'pranks', 'pranking', 'challenge', 'challenges',
+                        'tag', 'dare', '24 hour challenge', 'try not to laugh',
+                        
+                        // Shows & Serials
+                        'tmkoc', 'taarak mehta', 'cid', 'kapil sharma', 'bigg boss',
+                        'kbc', 'indian idol', 'dance india dance', 'sa re ga ma',
+                        
+                        // Animation & Kids
+                        'cartoon', 'cartoons', 'anime', 'animated', 'animation',
+                        'kids show', 'kids video', 'nursery rhymes', 'rhymes',
+                        
+                        // Celebrity & Gossip
+                        'celebrity', 'celebrities', 'gossip', 'news', 'breaking news',
+                        'scandal', 'controversy', 'viral', 'trending',
+                        
+                        // Dance & Music
+                        'dance', 'dancing', 'dancer', 'choreography', 'dance video',
+                        'party', 'party song', 'dj', 'remix', 'mashup', 'mix',
+                        
+                        // Events & Celebrations
+                        'wedding', 'marriage', 'birthday', 'celebration', 'event',
+                        'festival', 'party video', 'function',
+                        
+                        // Travel & Food
+                        'travel', 'travel vlog', 'vacation', 'trip', 'tour', 'tourism',
+                        'food', 'food vlog', 'mukbang', 'eating', 'tasting', 'recipe show',
+                        'restaurant', 'street food', 'cooking show',
+                        
+                        // Sports
+                        'sports', 'sport', 'cricket', 'football', 'soccer', 'match',
+                        'highlights', 'goals', 'best moments', 'funny moments', 'fails',
+                        'ipl', 'world cup', 'tournament', 'game highlights',
+                        
+                        // Social Media Content
+                        'compilation', 'best of', 'top 10', 'top 5',
+                        'reaction', 'reacting', 'reacting to', 'responds to', 'response',
+                        'unboxing', 'haul', 'shopping', 'shopping haul',
+                        'review' // Note: Can be educational, but often entertainment
+                        
+                        // Beauty & Fashion
+                        'makeup', 'makeup tutorial', 'beauty', 'beauty tips',
+                        'fashion', 'outfit', 'styling', 'lookbook', 'grwm',
+                        'get ready with me', 'transformation',
+                        
+                        // Podcasts & Talks (non-educational)
+                        'podcast', 'talk show', 'chat', 'gossip', 'celebrity interview',
+                        
+                        // Misc Entertainment
+                        'magic', 'magic trick', 'illusion', 'stunt', 'stunts',
+                        'asmr', 'satisfying', 'oddly satisfying'
                     ];
                     
-                    // Educational channel indicators
+                    // Educational channel indicators - Expanded list
                     const educationalChannelKeywords = [
-                        'academy', 'education', 'learning', 'tutorial', 'course',
-                        'university', 'college', 'school', 'institute', 'training',
-                        'tech', 'code', 'programming', 'developer', 'engineer'
+                        'academy', 'education', 'educational', 'learning', 'learn',
+                        'tutorial', 'tutorials', 'course', 'courses', 'training',
+                        'university', 'college', 'school', 'institute', 'institution',
+                        'tech', 'technology', 'code', 'coding', 'programming', 'programmer',
+                        'developer', 'development', 'engineer', 'engineering',
+                        'teacher', 'instructor', 'professor', 'tutor', 'mentor',
+                        'study', 'studies', 'scholar', 'academic', 'lecture',
+                        'mit', 'stanford', 'harvard', 'khan', 'udemy', 'coursera',
+                        'edx', 'skillshare', 'pluralsight', 'codecademy', 'freecodecamp'
                     ];
                     
                     // Try to fetch video metadata
