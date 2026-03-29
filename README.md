@@ -489,7 +489,7 @@ cd AI-Learning-Coach
 ## 📸 Screenshots
 
 ### Main Dashboard
-![Dashboard](screenshots/Screenshot%202026-03-29%20140516.png)
+![Dashboard](screenshots/Screenshot 2026-03-29 141009.png)
 *Main dashboard showing trust score, learning credibility, streak counter, and progress widgets*
 
 ### Study Plan Creation
