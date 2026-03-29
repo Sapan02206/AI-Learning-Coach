@@ -365,59 +365,6 @@ cd AI-Learning-Coach
 
 [🎬 Watch 3-Minute Demo Video](#) *(Coming Soon)*
 
-### Screenshots
-
-<details>
-<summary>📸 Click to view screenshots</summary>
-
-#### Dashboard - Learning Credibility Panel
-![Dashboard](https://i.imgur.com/placeholder1.png)
-*Real-time trust score, engagement level, and risk assessment with streak tracking and consistency metrics*
-
-> **Note:** Upload your dashboard screenshot to [Imgur](https://imgur.com) or [GitHub Issues](https://github.com/Sapan02206/AI-Learning-Coach/issues/new) and replace the URL above.
-
-#### Content Validation - Blocking Non-Educational Content
-![Content Validation](https://i.imgur.com/placeholder2.png)
-*AI-powered content validation blocking entertainment videos with trust score penalties*
-
-> **Note:** Upload your content validation screenshot and replace the URL above.
-
-#### Traditional Timer - Inactivity Detection
-![Traditional Timer](https://i.imgur.com/placeholder3.png)
-*Active session monitoring with inactivity warnings and real-time behavioral tracking*
-
-> **Note:** Upload your traditional timer screenshot and replace the URL above.
-
-#### Presence Check Modal
-![Presence Check](https://i.imgur.com/placeholder4.png)
-*Random presence checks to verify active studying with countdown timer*
-
-> **Note:** Upload your presence check screenshot and replace the URL above.
-
-#### PDF Learning Mode
-![PDF Mode](https://i.imgur.com/placeholder5.png)
-*PDF reader with page navigation, scroll depth tracking, and interaction monitoring*
-
-> **Note:** Upload your PDF learning screenshot and replace the URL above.
-
-#### Video Learning Mode
-![Video Mode](https://i.imgur.com/placeholder6.png)
-*YouTube video integration with real-time behavioral metrics and engagement tracking*
-
-> **Note:** Upload your video learning screenshot and replace the URL above.
-
----
-
-**📤 How to Add Your Screenshots:**
-
-1. Go to [Imgur.com](https://imgur.com) (no account needed)
-2. Click "New post" and upload each screenshot
-3. Right-click the uploaded image → "Copy image address"
-4. Replace the placeholder URLs above with your Imgur links
-5. Or simply drag & drop images into a [GitHub Issue](https://github.com/Sapan02206/AI-Learning-Coach/issues/new) and copy the generated URLs
-
-</details>
-
 ---
 
 ## 🧪 Testing Guide
