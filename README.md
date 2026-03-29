@@ -62,7 +62,7 @@ We don't just track time—we **verify genuine learning** through:
 - Session validation with reflection prompts
 
 #### 2️⃣ Video Learning Mode
-- **YouTube Integration** with content validation
+- **YouTube Integration** with smart content validation
 - **Real-Time Metrics**:
   - ⏱️ Watch Time (updates every second)
   - 🖱️ Mouse Activity (color-coded: green/orange/red)
@@ -71,11 +71,17 @@ We don't just track time—we **verify genuine learning** through:
 - **Smart Inactivity Detection**:
   - Allows watching without constant interaction
   - Warns only on tab switching (2+ minutes)
-- **Content Blocking**:
-  - 50+ educational keywords required
-  - 30+ entertainment keywords blocked
+- **Smart Content Validation** (4-Step Process):
+  - ❌ **Step 1**: Block entertainment (100+ keywords: music, gaming, vlogs, sports)
+  - ✅ **Step 2**: Auto-approve educational (150+ keywords: tutorial, course, lecture, programming)
+  - ✅ **Step 3**: Auto-approve educational channels (30+ keywords: Khan Academy, MIT, Coursera)
+  - ⚠️ **Step 4**: User confirmation for unclear content (monitored through engagement)
+- **Comprehensive Keyword Coverage**:
+  - 150+ educational keywords (tutorial, lecture, course, ch, chapter, subject, assignment, etc.)
+  - 100+ entertainment keywords (music video, gaming, vlog, prank, sports, etc.)
+  - 30+ educational channel keywords (academy, khan, mit, coursera, etc.)
   - Validates title AND channel name
-  - Instant trust score penalty for violations
+  - Instant trust score penalty for entertainment violations
 
 #### 3️⃣ PDF Learning Mode
 - **PDF.js Integration** for in-browser reading
@@ -100,12 +106,13 @@ We don't just track time—we **verify genuine learning** through:
 
 | Layer | Detection Method | Penalty |
 |-------|-----------------|---------|
-| **Content Validation** | AI keyword analysis | -10% trust score |
+| **Content Validation** | 4-step smart validation (280+ keywords) | -10% trust score for entertainment |
 | **Session Duration** | <30s instant fail | 0% session score |
 | **Rapid Actions** | Page flips, scrolling | -8 to -5 points each |
 | **Tab Switching** | Focus loss tracking | -25 points if >5 |
 | **Inactivity** | Smart idle detection | Trust score decay |
 | **Pattern Analysis** | Suspicious behavior | -10 to -20 points |
+| **Engagement Monitoring** | For confirmed unclear content | -5 to -10 points for low engagement |
 
 ### 🎯 Scoring Algorithm
 
@@ -130,6 +137,128 @@ Base Score: 100
 - Tab switches >5: -20 points
 - Low interaction: -15 points
 ```
+
+---
+
+## 🎯 Smart Content Validation System
+
+### 4-Step Intelligent Validation
+
+Our advanced validation system ensures only educational content is used while maintaining flexibility for legitimate videos.
+
+#### Step 1: Block Entertainment Content ❌
+**Strict Blocking - No Exceptions**
+- 100+ entertainment keywords detected
+- Instant block with clear error message
+- Examples: music videos, gaming, vlogs, sports, TV shows, pranks
+
+**Blocked Keywords Include:**
+- Music: music video, song, album, concert, lyrics
+- Gaming: gameplay, pubg, fortnite, minecraft, gaming
+- Entertainment: vlog, prank, challenge, funny, meme
+- Shows: tmkoc, serial, episode, reality show
+- Sports: cricket, football, ipl, match highlights
+- And 90+ more entertainment indicators
+
+#### Step 2: Auto-Approve Educational Content ✅
+**Instant Approval - No Interruption**
+- 150+ educational keywords detected
+- Video starts immediately
+- Examples: tutorials, lectures, courses, programming videos
+
+**Educational Keywords Include:**
+- Core: tutorial, lecture, course, learn, study, lesson
+- Academic: chapter, ch, subject, assignment, exam, test
+- Tech: programming, coding, python, java, javascript
+- Subjects: math, science, physics, chemistry, biology
+- Professional: interview, career, skill, certification
+- And 140+ more educational indicators
+
+#### Step 3: Recognize Educational Channels ✅
+**Trusted Platforms - Auto-Approved**
+- 30+ educational channel keywords
+- Instant approval for known educational platforms
+- Examples: Khan Academy, MIT, Coursera, Udemy
+
+**Recognized Channels:**
+- Khan Academy, MIT OpenCourseWare, Stanford Online
+- Coursera, Udemy, edX, Skillshare
+- FreeCodeCamp, Codecademy, Pluralsight
+- And other educational institutions
+
+#### Step 4: User Confirmation for Unclear Content ⚠️
+**Smart Handling of Edge Cases**
+
+For videos without clear educational or entertainment indicators:
+- Shows confirmation dialog with video details
+- User decides if content is educational
+- Engagement is monitored to prevent abuse
+- Low engagement results in trust score penalty
+
+**Confirmation Dialog:**
+```
+⚠️ EDUCATIONAL CONTENT VERIFICATION
+
+Video: "[Video Title]"
+Channel: "[Channel Name]"
+
+This video doesn't have clear educational keywords.
+
+✓ Click OK if this IS educational content
+✗ Click Cancel if this is NOT educational
+
+Note: Your choice will be monitored through engagement metrics.
+Low engagement will reduce your trust score.
+```
+
+### Why This System Works
+
+✅ **Handles All Scenarios:**
+- Clear educational content → Auto-approved (no interruption)
+- Clear entertainment → Blocked immediately (strict)
+- Educational without keywords → User confirms (flexible)
+- Educational channels → Auto-approved (smart)
+
+✅ **Prevents False Positives:**
+- Legitimate educational videos without obvious keywords can be used
+- User has final say for edge cases
+- System monitors engagement to verify authenticity
+
+✅ **Prevents Abuse:**
+- Entertainment strictly blocked (100+ keywords)
+- User confirmations monitored through engagement
+- Low engagement = trust score penalty
+- Can't fake genuine learning behavior
+
+✅ **Best User Experience:**
+- Minimal interruption for clear educational content
+- Quick confirmation for unclear cases
+- Transparent process with clear feedback
+- Fair and accountable system
+
+### Validation Examples
+
+**Auto-Approved ✅ (No Dialog):**
+- "Python Programming Tutorial for Beginners"
+- "Machine Learning Course - Lecture 5"
+- "Ch 1: Introduction to Data Structures"
+- "Subject: Mathematics - Calculus Basics"
+- Video from "Khan Academy"
+- Video from "MIT OpenCourseWare"
+
+**Blocked ❌ (Error Message):**
+- "Official Music Video 2024"
+- "PUBG Gameplay Highlights"
+- "TMKOC Latest Episode"
+- "Daily Vlog - My Routine"
+- "IPL Match Best Moments"
+- "Funny Pranks Compilation"
+
+**Requires Confirmation ⚠️ (Dialog Shown):**
+- "Advanced Techniques for Better Results"
+- "Part 5: Important Concepts"
+- "Next Steps in Your Journey"
+- Videos from unknown channels without clear keywords
 
 ---
 
