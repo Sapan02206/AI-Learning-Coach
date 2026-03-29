@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![AI Learning Coach Banner](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/banner.png)
+
 ![Version](https://img.shields.io/badge/version-1.3-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![React](https://img.shields.io/badge/React-18.2.0-61DAFB.svg?logo=react)
@@ -10,6 +12,8 @@
 **The world's first AI-powered learning platform that doesn't just track time—it verifies genuine learning through advanced behavioral intelligence.**
 
 [🚀 Live Demo](https://sapan02206.github.io/AI-Learning-Coach/) | [📖 Documentation](#documentation) | [🎥 Video Demo](#demo) | [🤝 Contributing](#contributing)
+
+![Dashboard Preview](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/dashboard.png)
 
 </div>
 
@@ -366,17 +370,29 @@ cd AI-Learning-Coach
 <details>
 <summary>📸 Click to view screenshots</summary>
 
-#### Dashboard
-![Dashboard](https://via.placeholder.com/800x450?text=Dashboard+Screenshot)
+#### Dashboard - Learning Credibility Panel
+![Dashboard](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/dashboard.png)
+*Real-time trust score, engagement level, and risk assessment with streak tracking and consistency metrics*
 
-#### Video Learning Mode
-![Video Mode](https://via.placeholder.com/800x450?text=Video+Learning+Screenshot)
+#### Content Validation - Blocking Non-Educational Content
+![Content Validation](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/content-validation.png)
+*AI-powered content validation blocking entertainment videos with trust score penalties*
+
+#### Traditional Timer - Inactivity Detection
+![Traditional Timer](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/traditional-timer.png)
+*Active session monitoring with inactivity warnings and real-time behavioral tracking*
+
+#### Presence Check Modal
+![Presence Check](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/presence-check.png)
+*Random presence checks to verify active studying with countdown timer*
 
 #### PDF Learning Mode
-![PDF Mode](https://via.placeholder.com/800x450?text=PDF+Learning+Screenshot)
+![PDF Mode](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/pdf-learning.png)
+*PDF reader with page navigation, scroll depth tracking, and interaction monitoring*
 
-#### Session Summary
-![Summary](https://via.placeholder.com/800x450?text=Session+Summary+Screenshot)
+#### Video Learning Mode
+![Video Mode](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/video-learning.png)
+*YouTube video integration with real-time behavioral metrics and engagement tracking*
 
 </details>
 
