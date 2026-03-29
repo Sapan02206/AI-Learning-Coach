@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Test - AI Learning Coach</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        .success { background: #10b981; color: white; }
+        .error { background: #ef4444; color: white; }
+        .warning { background: #f59e0b; color: white; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .code {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 0.5rem 0;
+        }
+        h1 { color: #3b82f6; }
+        h2 { color: #10b981; margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Feature Test Page</h1>
+    <p>This page will verify that all new features are present in your index.html file.</p>
+
+    <div class="test-section">
+        <h2>📋 Feature Checklist</h2>
+        <div id="checklist">Checking features...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎬 Video Player Test</h2>
+        <p>The video player should now be:</p>
+        <ul>
+            <li>✓ 480px height (visible and large)</li>
+            <li>✓ Black background</li>
+            <li>✓ Full YouTube controls</li>
+            <li>✓ Audio enabled</li>
+        </ul>
+        <button onclick="window.location.href='index.html'">Open Main App</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🛡️ Anti-Cheat System</h2>
+        <p><strong>Educational Keywords Checked:</strong></p>
+        <div class="code">tutorial, lecture, course, learn, education, study, programming, math, science</div>
+        <p><strong>Blocked Keywords:</strong></p>
+        <div class="code">music, song, movie, game, funny, meme, vlog, prank</div>
+        <p><strong>Penalty:</strong> -10% trust score, -5% consistency</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🖍️ PDF Highlighting</h2>
+        <p>New features:</p>
+        <ul>
+            <li>✓ Highlight button added</li>
+            <li>✓ Prevents highlighting if < 3 seconds on page</li>
+            <li>✓ Tracks highlight quality</li>
+            <li>✓ Shows highlight counter</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Rapid Scroll Detection</h2>
+        <p>Detects:</p>
+        <ul>
+            <li>✓ Scrolling > 2 pixels/millisecond</li>
+            <li>✓ Shows "Fast Scroll" counter</li>
+            <li>✓ Turns RED if > 5 rapid scrolls</li>
+            <li>✓ Reduces reading quality score</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 How to See Changes</h2>
+        <ol>
+            <li><strong>Close all browser tabs</strong> with the app</li>
+            <li><strong>Clear browser cache:</strong>
+                <ul>
+                    <li>Chrome: Ctrl+Shift+Delete → Clear cached images and files</li>
+                    <li>Or: Ctrl+Shift+R (hard refresh)</li>
+                </ul>
+            </li>
+            <li><strong>Open index.html again</strong></li>
+            <li><strong>Open Console (F12)</strong> to see debug messages</li>
+        </ol>
+        <button onclick="alert('Steps to refresh:\n1. Close all tabs\n2. Press Ctrl+Shift+R\n3. Open index.html\n4. Press F12 for console')">Show Refresh Steps</button>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ Quick Tests</h2>
+        <p><strong>Test 1: Video Player</strong></p>
+        <ol>
+            <li>Open index.html</li>
+            <li>Click "Video Learning Session"</li>
+            <li>Paste: <span class="code">https://www.youtube.com/watch?v=rfscVS0vtbw</span></li>
+            <li>Click "Start Video Session"</li>
+            <li>Wait 5 seconds</li>
+            <li>✓ Video should be VISIBLE with controls</li>
+        </ol>
+
+        <p><strong>Test 2: Anti-Cheat</strong></p>
+        <ol>
+            <li>Click "Video Learning Session"</li>
+            <li>Paste any music video URL</li>
+            <li>Click "Start Video Session"</li>
+            <li>✓ Should show RED warning</li>
+            <li>✓ Alert about cheating</li>
+            <li>✓ Video blocked</li>
+        </ol>
+
+        <p><strong>Test 3: PDF Highlighting</strong></p>
+        <ol>
+            <li>Click "PDF Learning Session"</li>
+            <li>Upload any PDF</li>
+            <li>Click "Start PDF Session"</li>
+            <li>✓ Should see "🖍 Highlight Important" button</li>
+            <li>Wait 5 seconds</li>
+            <li>Click highlight button</li>
+            <li>✓ Highlight counter should increase</li>
+        </ol>
+    </div>
+
+    <script>
+        // Check if features are in the file
+        fetch('index.html')
+            .then(response => response.text())
+            .then(content => {
+                const checks = [
+                    { name: 'Video height 480px', test: content.includes("height: isFullscreen ? '100%' : '480px'") },
+                    { name: 'Content validation', test: content.includes('validateVideoContent') },
+                    { name: 'Educational keywords', test: content.includes('educationalKeywords') },
+                    { name: 'Highlighting feature', test: content.includes('handleHighlight') },
+                    { name: 'Rapid scroll detection', test: content.includes('rapidScrollCount') },
+                    { name: 'Highlight quality', test: content.includes('highlightQuality') },
+                    { name: 'Reading quality score', test: content.includes('readingQualityScore') },
+                    { name: 'Cheating attempts tracking', test: content.includes('cheatingAttempts') }
+                ];
+
+                let html = '<ul style="list-style: none; padding: 0;">';
+                let allPassed = true;
+                
+                checks.forEach(check => {
+                    const status = check.test ? 
+                        '<span class="status success">✓ FOUND</span>' : 
+                        '<span class="status error">✗ MISSING</span>';
+                    html += `<li style="padding: 0.5rem 0;">${check.name} ${status}</li>`;
+                    if (!check.test) allPassed = false;
+                });
+                
+                html += '</ul>';
+                
+                if (allPassed) {
+                    html += '<div style="background: rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 2px solid #10b981;">';
+                    html += '<strong style="color: #10b981;">✅ ALL FEATURES PRESENT!</strong><br>';
+                    html += 'If you can\'t see them, please:<br>';
+                    html += '1. Close all browser tabs<br>';
+                    html += '2. Press Ctrl+Shift+R (hard refresh)<br>';
+                    html += '3. Open index.html again';
+                    html += '</div>';
+                } else {
+                    html += '<div style="background: rgba(239, 68, 68, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 2px solid #ef4444;">';
+                    html += '<strong style="color: #ef4444;">⚠️ SOME FEATURES MISSING</strong><br>';
+                    html += 'The file may not have been saved correctly.';
+                    html += '</div>';
+                }
+                
+                document.getElementById('checklist').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('checklist').innerHTML = 
+                    '<div class="status error">Error checking file: ' + error.message + '</div>';
+            });
+    </script>
+</body>
+</html>

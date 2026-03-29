@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test React & Lucide</title>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        function TestApp() {
+            const [count, setCount] = useState(0);
+            const Heart = lucide.Heart;
+            
+            return React.createElement('div', { style: { padding: '20px', fontFamily: 'Arial' } },
+                React.createElement('h1', null, 'React & Lucide Test'),
+                React.createElement('p', null, `Count: ${count}`),
+                React.createElement('button', { 
+                    onClick: () => setCount(count + 1),
+                    style: { padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }
+                }, 'Click Me'),
+                React.createElement('div', { style: { marginTop: '20px' } },
+                    React.createElement(Heart, { size: 48, color: 'red' })
+                )
+            );
+        }
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(TestApp));
+    </script>
+</body>
+</html>

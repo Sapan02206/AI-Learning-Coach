@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Debug - AI Learning Coach</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1e293b; color: white; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #10b981; }
+        .error { background: #ef4444; }
+        .loading { background: #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>Loading Diagnostics</h1>
+    <div id="status"></div>
+    <div id="root"></div>
+    
+    <script>
+        const status = document.getElementById('status');
+        function log(msg, type = 'loading') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = msg;
+            status.appendChild(div);
+            console.log(msg);
+        }
+        
+        log('Starting to load scripts...');
+    </script>
+    
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script>
+        if (typeof React !== 'undefined') {
+            log('✅ React loaded successfully', 'success');
+        } else {
+            log('❌ React failed to load', 'error');
+        }
+    </script>
+    
+    <!-- ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script>
+        if (typeof ReactDOM !== 'undefined') {
+            log('✅ ReactDOM loaded successfully', 'success');
+        } else {
+            log('❌ ReactDOM failed to load', 'error');
+        }
+    </script>
+    
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@0.300.0/dist/umd/lucide.js"></script>
+    <script>
+        if (typeof lucide !== 'undefined') {
+            log('✅ Lucide loaded successfully', 'success');
+        } else {
+            log('❌ Lucide failed to load', 'error');
+        }
+    </script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+    <script>
+        if (typeof Babel !== 'undefined') {
+            log('✅ Babel loaded successfully', 'success');
+        } else {
+            log('❌ Babel failed to load', 'error');
+        }
+    </script>
+    
+    <script type="text/babel">
+        log('✅ Babel is transforming JSX', 'success');
+        
+        const { useState } = React;
+        
+        function TestApp() {
+            const [count, setCount] = useState(0);
+            const Brain = lucide.Brain;
+            
+            return React.createElement('div', { style: { marginTop: '20px', padding: '20px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px' } },
+                React.createElement('h2', null, '✅ React App is Running!'),
+                React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '10px', margin: '20px 0' } },
+                    React.createElement(Brain, { size: 32, color: '#3b82f6' }),
+                    React.createElement('p', null, `Button clicked: ${count} times`)
+                ),
+                React.createElement('button', {
+                    onClick: () => setCount(count + 1),
+                    style: { padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }
+                }, 'Click Me!')
+            );
+        }
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(TestApp));
+        
+        log('✅ React app rendered successfully!', 'success');
+    </script>
+</body>
+</html>

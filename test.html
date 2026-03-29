@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <h1>Testing Date Functions</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Test the date functions
+        const format = (date, fmt) => {
+            if (!date) return "";
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            if (fmt === "yyyy-MM-dd") return `${year}-${month}-${day}`;
+            if (fmt === "EEE") return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+            if (fmt === "d") return String(d.getDate());
+            if (fmt === "EEEE") return ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()];
+            return d.toISOString();
+        };
+        
+        const today = new Date();
+        document.getElementById('output').innerHTML = `
+            <p>Today: ${format(today, 'yyyy-MM-dd')}</p>
+            <p>Day: ${format(today, 'EEEE')}</p>
+            <p>Short day: ${format(today, 'EEE')}</p>
+            <p>Date: ${format(today, 'd')}</p>
+        `;
+    </script>
+</body>
+</html>

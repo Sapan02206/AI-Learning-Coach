@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![AI Learning Coach Banner](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/banner.png)
+![AI Learning Coach Banner](screenshots/Ai%20Learning%20Coach%20Banner/Screenshot%202026-03-29%20200726.png)
 
 ![Version](https://img.shields.io/badge/version-1.3-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -12,8 +12,6 @@
 **The world's first AI-powered learning platform that doesn't just track time—it verifies genuine learning through advanced behavioral intelligence.**
 
 [🚀 Live Demo](https://sapan02206.github.io/AI-Learning-Coach/) | [📖 Documentation](#documentation) | [🎥 Video Demo](#demo) | [🤝 Contributing](#contributing)
-
-![Dashboard Preview](https://raw.githubusercontent.com/Sapan02206/AI-Learning-Coach/main/screenshots/dashboard.png)
 
 </div>
 
@@ -485,6 +483,54 @@ cd AI-Learning-Coach
 - 🔥 Monitor streak count
 - 📈 Check completion rate
 - 🎯 Read personalized insights
+
+---
+
+## 📸 Screenshots
+
+### Dashboard & Trust Score System
+![Dashboard](screenshots/Screenshot%202026-03-29%20140516.png)
+*Main dashboard showing trust score, consistency tracking, and daily tasks*
+
+### Video Learning Mode
+![Video Learning](screenshots/Screenshot%202026-03-29%20140907.png)
+*YouTube video integration with real-time behavioral tracking*
+
+### Smart Content Validation
+![Content Validation](screenshots/Screenshot%202026-03-29%20140932.png)
+*4-step smart validation system in action*
+
+### PDF Learning Mode
+![PDF Learning](screenshots/Screenshot%202026-03-29%20140953.png)
+*PDF reader with page tracking and highlighting features*
+
+### Real-Time Metrics
+![Real-Time Metrics](screenshots/Screenshot%202026-03-29%20141009.png)
+*Live engagement and focus tracking during sessions*
+
+### Session Summary
+![Session Summary](screenshots/Screenshot%202026-03-29%20142808.png)
+*Detailed session results with behavioral analysis*
+
+### Consistency Heatmap
+![Consistency Heatmap](screenshots/Screenshot%202026-03-29%20143333.png)
+*Visual 14-day consistency tracking with color-coded performance*
+
+### AI Insights
+![AI Insights](screenshots/Screenshot%202026-03-29%20151921.png)
+*Personalized AI-generated insights and recommendations*
+
+### Study Plan Generation
+![Study Plan](screenshots/Screenshot%202026-03-29%20153714.png)
+*AI-powered study plan creation with task breakdown*
+
+### Behavioral Tracking
+![Behavioral Tracking](screenshots/Screenshot%202026-03-29%20162203.png)
+*Advanced behavioral metrics and engagement monitoring*
+
+### Trust Score Analytics
+![Trust Score Analytics](screenshots/Screenshot%202026-03-29%20162630.png)
+*Detailed trust score breakdown and credibility tracking*
 
 ---
 
