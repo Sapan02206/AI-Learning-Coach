@@ -577,15 +577,94 @@ textarea:focus {
                 }
                 advancedBehaviorTracker.stop();
                 const behaviorData = advancedBehaviorTracker.getSessionData();
+                
+                // Calculate session duration
+                const sessionDuration = Date.now() - sessionData.startTime;
+                const sessionMinutes = sessionDuration / 60000;
+                const sessionSeconds = sessionDuration / 1000;
+                
+                // CRITICAL: Analyze video watching behavior
+                const isTooShort = sessionDuration < 30000; // Less than 30 seconds
+                const isVeryShort = sessionDuration < 60000; // Less than 1 minute
+                const tooManySkips = sessionData.skipCount > 5;
+                const excessiveSkips = sessionData.skipCount > 10;
+                const tooManyPauses = sessionData.pauseCount > 10;
+                const excessivePauses = sessionData.pauseCount > 20;
+                const tooManyTabSwitches = behaviorData.focusLost > 5;
+                const lowCompletion = sessionData.completionRate < 20;
+                const veryLowCompletion = sessionData.completionRate < 10;
+                const lowEngagement = behaviorData.mouseMovements < 20 && sessionSeconds > 60;
+                
+                // START WITH BASE SCORE OF 100
+                let videoQualityScore = 100;
+                
+                // APPLY SEVERE PENALTIES
+                if (isTooShort) {
+                    videoQualityScore = 0; // Instant fail for < 30s
+                    console.warn('⚠️ Video session too short (< 30s)! Score = 0');
+                } else if (isVeryShort) {
+                    videoQualityScore = Math.max(0, videoQualityScore - 60);
+                    console.warn('⚠️ Very short video session (< 1 min)! -60 points');
+                } else {
+                    // Apply penalties for bad watching behavior
+                    if (veryLowCompletion) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 50);
+                        console.warn('⚠️ Very low completion (< 10%)! -50 points');
+                    } else if (lowCompletion) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 30);
+                        console.warn('⚠️ Low completion (< 20%)! -30 points');
+                    }
+                    
+                    if (excessiveSkips) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 40);
+                        console.warn(`⚠️ Excessive skipping (${sessionData.skipCount} skips)! -40 points`);
+                    } else if (tooManySkips) {
+                        videoQualityScore = Math.max(0, videoQualityScore - (sessionData.skipCount * 5));
+                        console.warn(`⚠️ Too many skips (${sessionData.skipCount})! -${sessionData.skipCount * 5} points`);
+                    }
+                    
+                    if (excessivePauses) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 30);
+                        console.warn(`⚠️ Excessive pausing (${sessionData.pauseCount} pauses)! -30 points`);
+                    } else if (tooManyPauses) {
+                        videoQualityScore = Math.max(0, videoQualityScore - (sessionData.pauseCount * 2));
+                        console.warn(`⚠️ Too many pauses (${sessionData.pauseCount})! -${sessionData.pauseCount * 2} points`);
+                    }
+                    
+                    if (tooManyTabSwitches) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 25);
+                        console.warn(`⚠️ Too many tab switches (${behaviorData.focusLost})! -25 points`);
+                    }
+                    
+                    if (lowEngagement) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 20);
+                        console.warn('⚠️ Very low engagement (minimal interaction)! -20 points');
+                    }
+                    
+                    // Penalty for too many rewinds (might indicate not paying attention)
+                    if (sessionData.rewindCount > 10) {
+                        videoQualityScore = Math.max(0, videoQualityScore - 15);
+                        console.warn(`⚠️ Excessive rewinding (${sessionData.rewindCount})! -15 points`);
+                    }
+                }
+                
                 const finalData = {
                     ...sessionData,
                     ...behaviorData,
                     type: 'video',
                     videoId,
                     endTime: Date.now(),
+                    sessionDuration,
+                    sessionMinutes: Math.round(sessionMinutes * 100) / 100,
                     totalSkips: sessionData.skipCount,
                     totalRewinds: sessionData.rewindCount,
-                    pauseDuration: sessionData.pauseDuration
+                    pauseDuration: sessionData.pauseDuration,
+                    videoQualityScore: Math.round(videoQualityScore),
+                    isTooShort,
+                    isVeryShort,
+                    tooManySkips,
+                    tooManyPauses,
+                    tooManyTabSwitches
                 };
                 onSessionComplete(finalData);
                 setIsActive(false);
@@ -935,6 +1014,7 @@ textarea:focus {
                 // Calculate session duration
                 const sessionDuration = Date.now() - sessionStart;
                 const sessionMinutes = sessionDuration / 60000;
+                const sessionSeconds = sessionDuration / 1000;
                 
                 // Calculate average time per page
                 const pageTimes = Object.values(pageTimeTracking);
@@ -942,28 +1022,67 @@ textarea:focus {
                     ? pageTimes.reduce((a, b) => a + (b.timeSpent || 0), 0) / pageTimes.length 
                     : 0;
                 
-                // CRITICAL: Detect if session was too short (< 30 seconds)
-                const isTooShort = sessionDuration < 30000;
-                
-                // CRITICAL: Detect if barely any pages visited
+                // CRITICAL: Detect various bad behaviors
+                const isTooShort = sessionDuration < 30000; // Less than 30 seconds
+                const isVeryShort = sessionDuration < 60000; // Less than 1 minute
                 const pagesVisitedPercent = (Object.keys(pageTimeTracking).length / totalPages) * 100;
                 const barelyRead = pagesVisitedPercent < 20;
+                const veryFewPages = Object.keys(pageTimeTracking).length < 3;
+                const tooManyTabSwitches = behaviorData.focusLost > 5;
+                const tooManyRapidFlips = rapidPageChanges > 3;
+                const tooMuchRapidScroll = rapidScrollCount > 5;
+                const avgTimePerPageSeconds = avgTimePerPage / 1000;
                 
-                // Calculate reading quality score with penalties
-                let readingQualityScore = Math.max(0, 100 - (rapidPageChanges * 5) - (rapidScrollCount * 3));
+                // START WITH BASE SCORE OF 100
+                let readingQualityScore = 100;
                 
-                // Apply severe penalties for bad behavior
+                // APPLY SEVERE PENALTIES
                 if (isTooShort) {
-                    readingQualityScore = Math.max(0, readingQualityScore - 40);
-                    console.warn('⚠️ Session too short! Penalty applied.');
-                }
-                if (barelyRead) {
-                    readingQualityScore = Math.max(0, readingQualityScore - 30);
-                    console.warn('⚠️ Barely any pages read! Penalty applied.');
-                }
-                if (avgTimePerPage < 5000) {
-                    readingQualityScore = Math.max(0, readingQualityScore - 20);
-                    console.warn('⚠️ Too fast reading! Penalty applied.');
+                    readingQualityScore = 0; // Instant fail for < 30s
+                    console.warn('⚠️ Session too short (< 30s)! Score = 0');
+                } else if (isVeryShort) {
+                    readingQualityScore = Math.max(0, readingQualityScore - 60);
+                    console.warn('⚠️ Very short session (< 1 min)! -60 points');
+                } else {
+                    // Apply penalties for other bad behaviors
+                    if (barelyRead) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 40);
+                        console.warn('⚠️ Barely any pages read (< 20%)! -40 points');
+                    }
+                    if (veryFewPages) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 30);
+                        console.warn('⚠️ Very few pages visited (< 3)! -30 points');
+                    }
+                    if (avgTimePerPageSeconds < 5) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 25);
+                        console.warn('⚠️ Too fast reading (< 5s/page)! -25 points');
+                    }
+                    if (avgTimePerPageSeconds < 10) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 15);
+                        console.warn('⚠️ Fast reading (< 10s/page)! -15 points');
+                    }
+                    if (tooManyTabSwitches) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 20);
+                        console.warn('⚠️ Too many tab switches (> 5)! -20 points');
+                    }
+                    if (tooManyRapidFlips) {
+                        readingQualityScore = Math.max(0, readingQualityScore - (rapidPageChanges * 8));
+                        console.warn(`⚠️ Too many rapid page flips! -${rapidPageChanges * 8} points`);
+                    }
+                    if (tooMuchRapidScroll) {
+                        readingQualityScore = Math.max(0, readingQualityScore - (rapidScrollCount * 5));
+                        console.warn(`⚠️ Too much rapid scrolling! -${rapidScrollCount * 5} points`);
+                    }
+                    
+                    // Additional penalties for low engagement
+                    if (behaviorData.mouseMovements < 50 && sessionSeconds > 60) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 15);
+                        console.warn('⚠️ Very low mouse activity! -15 points');
+                    }
+                    if (behaviorData.scrollEvents < 10 && sessionSeconds > 60) {
+                        readingQualityScore = Math.max(0, readingQualityScore - 15);
+                        console.warn('⚠️ Very low scroll activity! -15 points');
+                    }
                 }
                 
                 // Calculate highlight quality
@@ -1298,12 +1417,64 @@ textarea:focus {
                         transform: 'translateX(-50%)',
                         zIndex: 1000,
                         display: 'flex',
-                        gap: '1rem'
+                        gap: '1rem',
+                        alignItems: 'center'
                     }
                 },
                     React.createElement('button', {
+                        onClick: () => handlePageChange(currentPage - 1),
+                        disabled: currentPage === 1,
+                        style: { 
+                            padding: '0.75rem 1.5rem', 
+                            background: currentPage === 1 ? 'rgba(255,255,255,0.1)' : 'var(--accent-secondary)', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '8px', 
+                            cursor: currentPage === 1 ? 'not-allowed' : 'pointer', 
+                            fontWeight: '600', 
+                            fontSize: '1rem',
+                            opacity: currentPage === 1 ? 0.5 : 1
+                        }
+                    }, '← Previous'),
+                    React.createElement('span', {
+                        style: {
+                            padding: '0.75rem 1.5rem',
+                            background: 'rgba(0,0,0,0.8)',
+                            color: 'white',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            fontSize: '1rem',
+                            border: '1px solid rgba(255,255,255,0.2)'
+                        }
+                    }, `Page ${currentPage}/${totalPages}`),
+                    React.createElement('button', {
+                        onClick: () => handlePageChange(currentPage + 1),
+                        disabled: currentPage === totalPages,
+                        style: { 
+                            padding: '0.75rem 1.5rem', 
+                            background: currentPage === totalPages ? 'rgba(255,255,255,0.1)' : 'var(--accent-secondary)', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '8px', 
+                            cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', 
+                            fontWeight: '600', 
+                            fontSize: '1rem',
+                            opacity: currentPage === totalPages ? 0.5 : 1
+                        }
+                    }, 'Next →'),
+                    React.createElement('button', {
                         onClick: handleStopSession,
-                        style: { padding: '0.75rem 1.5rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem' }
+                        style: { 
+                            padding: '0.75rem 1.5rem', 
+                            background: 'var(--danger)', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '8px', 
+                            cursor: 'pointer', 
+                            fontWeight: '600', 
+                            fontSize: '1rem',
+                            marginLeft: '1rem'
+                        }
                     }, 'End Session')
                 )
             );
@@ -2949,58 +3120,113 @@ textarea:focus {
             const handleAdvancedSessionComplete = (sessionData) => {
                 const { type, elapsedSeconds, interactionDensity, mouseIntensity, scrollDepth } = sessionData;
                 
-                // Calculate enhanced scores
+                // Use the quality scores calculated in the session components
                 let focusScore = 100;
                 let engagementScore = 100;
                 
-                // Interaction density scoring
-                if (interactionDensity < 5) {
-                    focusScore -= 30;
-                    engagementScore -= 40;
-                } else if (interactionDensity < 15) {
-                    focusScore -= 15;
-                    engagementScore -= 20;
-                }
-                
-                // Mouse intensity scoring
-                if (mouseIntensity < 10) {
-                    engagementScore -= 20;
-                } else if (mouseIntensity > 100) {
-                    engagementScore += 10;
-                }
-                
-                // Content-specific scoring
+                // For VIDEO sessions - use the calculated videoQualityScore
                 if (type === 'video') {
-                    const { completionRate, pauseCount, playCount } = sessionData;
-                    if (completionRate < 50) focusScore -= 25;
-                    if (pauseCount > playCount * 2) focusScore -= 15;
-                    if (completionRate > 80) engagementScore += 15;
+                    const { 
+                        videoQualityScore = 0,
+                        completionRate = 0, 
+                        skipCount = 0,
+                        pauseCount = 0,
+                        rewindCount = 0,
+                        focusLost = 0,
+                        isTooShort = false,
+                        isVeryShort = false
+                    } = sessionData;
+                    
+                    // Use the calculated video quality score as focus score
+                    focusScore = videoQualityScore;
+                    
+                    // Calculate engagement based on interaction
+                    engagementScore = 100;
+                    if (isTooShort) {
+                        engagementScore = 0;
+                    } else if (isVeryShort) {
+                        engagementScore = Math.max(0, engagementScore - 50);
+                    } else {
+                        if (interactionDensity < 5) engagementScore -= 30;
+                        else if (interactionDensity < 15) engagementScore -= 15;
+                        if (mouseIntensity < 10) engagementScore -= 20;
+                        if (focusLost > 5) engagementScore -= 25;
+                        if (completionRate > 50) engagementScore += 10;
+                    }
+                    
+                    console.log(`📊 Video Session Scores: Focus=${focusScore}, Engagement=${engagementScore}`);
+                    
+                // For PDF sessions - use the calculated readingQualityScore
                 } else if (type === 'pdf') {
-                    const { pagesVisited, totalPages } = sessionData;
-                    const coverage = (pagesVisited / (totalPages || 1)) * 100;
-                    if (coverage < 30) focusScore -= 20;
-                    if (scrollDepth < 50) engagementScore -= 15;
-                    if (coverage > 70) engagementScore += 10;
+                    const { 
+                        readingQualityScore = 0,
+                        pagesVisited = 0,
+                        totalPages = 1,
+                        rapidPageChanges = 0,
+                        rapidScrollCount = 0,
+                        focusLost = 0,
+                        isTooShort = false,
+                        barelyRead = false
+                    } = sessionData;
+                    
+                    // Use the calculated reading quality score as focus score
+                    focusScore = readingQualityScore;
+                    
+                    // Calculate engagement based on interaction
+                    engagementScore = 100;
+                    if (isTooShort) {
+                        engagementScore = 0;
+                    } else {
+                        const coverage = (pagesVisited / totalPages) * 100;
+                        if (barelyRead) engagementScore -= 40;
+                        if (interactionDensity < 5) engagementScore -= 30;
+                        else if (interactionDensity < 15) engagementScore -= 15;
+                        if (mouseIntensity < 10) engagementScore -= 20;
+                        if (focusLost > 5) engagementScore -= 25;
+                        if (rapidPageChanges > 5) engagementScore -= 15;
+                        if (rapidScrollCount > 5) engagementScore -= 15;
+                        if (coverage > 70) engagementScore += 10;
+                    }
+                    
+                    console.log(`📊 PDF Session Scores: Focus=${focusScore}, Engagement=${engagementScore}`);
                 }
                 
-                focusScore = Math.max(0, Math.min(100, focusScore));
-                engagementScore = Math.max(0, Math.min(100, engagementScore));
+                // Ensure scores are within bounds
+                focusScore = Math.max(0, Math.min(100, Math.round(focusScore)));
+                engagementScore = Math.max(0, Math.min(100, Math.round(engagementScore)));
                 
-                // Determine learning behavior type
+                // Determine learning behavior type based on actual scores
                 let behaviorType = 'Balanced Learner';
-                if (focusScore > 80 && engagementScore > 80) {
-                    behaviorType = 'Highly Engaged Learner';
+                if (focusScore === 0 || engagementScore === 0) {
+                    behaviorType = '⚠️ Session Too Short';
+                } else if (focusScore < 30 || engagementScore < 30) {
+                    behaviorType = '❌ Poor Performance';
+                } else if (focusScore < 50 && engagementScore < 50) {
+                    behaviorType = '⚠️ Needs Improvement';
+                } else if (focusScore > 80 && engagementScore > 80) {
+                    behaviorType = '✅ Highly Engaged';
                 } else if (focusScore > 70 && engagementScore < 50) {
                     behaviorType = 'Focused but Passive';
                 } else if (focusScore < 50 && engagementScore > 70) {
                     behaviorType = 'Active but Distracted';
-                } else if (focusScore < 50 && engagementScore < 50) {
-                    behaviorType = 'Needs Improvement';
+                }
+                
+                // Calculate trust score change based on performance
+                let trustScoreChange = 0;
+                if (focusScore >= 80 && engagementScore >= 80) {
+                    trustScoreChange = 5;
+                } else if (focusScore >= 60 && engagementScore >= 60) {
+                    trustScoreChange = 2;
+                } else if (focusScore < 30 || engagementScore < 30) {
+                    trustScoreChange = -10;
+                } else if (focusScore < 50 || engagementScore < 50) {
+                    trustScoreChange = -5;
                 }
                 
                 // Update stats
                 let newStats = { ...stats };
                 newStats.totalTasksCompleted += 1;
+                newStats.trustScore = Math.max(0, Math.min(100, newStats.trustScore + trustScoreChange));
                 
                 // Add to history
                 const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -3020,6 +3246,22 @@ textarea:focus {
                 setStats(newStats);
                 saveStats(newStats);
                 
+                // Generate insight based on scores
+                let insight = '';
+                if (focusScore === 0 || engagementScore === 0) {
+                    insight = '⚠️ Session was too short to measure learning. Please spend at least 30 seconds.';
+                } else if (focusScore < 30) {
+                    insight = '❌ Very low focus detected. Too many distractions and poor engagement.';
+                } else if (focusScore < 50) {
+                    insight = '⚠️ Focus needs improvement. Try to minimize skipping, pausing, and tab switching.';
+                } else if (focusScore < 70) {
+                    insight = '👍 Decent focus, but there\'s room for improvement.';
+                } else if (focusScore < 85) {
+                    insight = '✅ Good focus! Keep up the consistent learning behavior.';
+                } else {
+                    insight = '🔥 Excellent focus and engagement! Outstanding learning session.';
+                }
+                
                 // Show result
                 setSessionResult({
                     title: `${type === 'video' ? 'Video' : 'PDF'} Learning Session`,
@@ -3027,6 +3269,8 @@ textarea:focus {
                     focusScore,
                     engagementScore,
                     behaviorType,
+                    trustScoreChange,
+                    insight,
                     insight: `${behaviorType} - Focus: ${focusScore}%, Engagement: ${engagementScore}%`,
                     trustScoreChange: 0
                 });
