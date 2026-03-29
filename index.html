@@ -1,15 +1,2318 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Learning Consistency Coach</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
+    
+    <style>
+:root {
+  --bg-dark: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #10b981;
+  --accent-glow: rgba(59, 130, 246, 0.4);
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: var(--text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+.glass-panel {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px 0 rgba(59, 130, 246, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.pulse-animation {
+  animation: pulse-glow 0.6s cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+button {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:active:not(:disabled)::after {
+  width: 300px;
+  height: 300px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.05) 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+    </style>
+</head>
+<body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    
+    <!-- React and dependencies from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@3.0.0/index.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+        const { format, addDays, differenceInDays, subDays, startOfDay, parseISO, isBefore } = dateFns;
+        
+        // Lucide Icons
+        const Brain = lucide.Brain;
+        const Shield = lucide.Shield;
+        const Flame = lucide.Flame;
+        const Target = lucide.Target;
+        const Trophy = lucide.Trophy;
+        const ShieldAlert = lucide.ShieldAlert;
+        const ShieldCheck = lucide.ShieldCheck;
+        const Activity = lucide.Activity;
+        const CheckSquare = lucide.CheckSquare;
+        const Square = lucide.Square;
+        const PlayCircle = lucide.PlayCircle;
+        const CheckCircle2 = lucide.CheckCircle2;
+        const Circle = lucide.Circle;
+        const Sparkles = lucide.Sparkles;
+        const Play = lucide.Play;
+        const Pause = lucide.Pause;
+        const SquareIcon = lucide.Square;
+        const Clock = lucide.Clock;
+        const AlertTriangle = lucide.AlertTriangle;
+        const EyeOff = lucide.EyeOff;
+        const Calendar = lucide.Calendar;
+        const TrendingUp = lucide.TrendingUp;
+        const TrendingDown = lucide.TrendingDown;
+        const Zap = lucide.Zap;
+        const AlertCircle = lucide.AlertCircle;
+        
+        // Storage Service
+        const PLAN_KEY = 'ai_coach_plan';
+        const TASKS_KEY = 'ai_coach_tasks';
+        const STATS_KEY = 'ai_coach_stats';
+        
+        const DEFAULT_STATS = {
+            currentStreak: 0,
+            longestStreak: 0,
+            consistencyScore: 100,
+            totalTasksCompleted: 0,
+            totalTasksAssigned: 0,
+            trustScore: 100,
+            history: []
+        };
+        
+        function savePlan(plan) {
+            localStorage.setItem(PLAN_KEY, JSON.stringify(plan));
+        }
+        
+        function getPlan() {
+            const data = localStorage.getItem(PLAN_KEY);
+            return data ? JSON.parse(data) : null;
+        }
+        
+        function saveTasks(tasks) {
+            localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+        }
+        
+        function getTasks() {
+            const data = localStorage.getItem(TASKS_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+        
+        function getStats() {
+            const data = localStorage.getItem(STATS_KEY);
+            return data ? JSON.parse(data) : DEFAULT_STATS;
+        }
+        
+        function saveStats(stats) {
+            localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+        }
+        
+        function clearAll() {
+            localStorage.removeItem(PLAN_KEY);
+            localStorage.removeItem(TASKS_KEY);
+            localStorage.removeItem(STATS_KEY);
+        }
+        
+        // Mock AI Service
+        const generateStudyPlan = (details) => {
+            const { subject, deadline, dailyMinutes, difficulty } = details;
+            const days = differenceInDays(new Date(deadline), new Date()) + 1;
+            const tasks = [];
+            
+            for (let i = 0; i < days; i++) {
+                const currentDate = format(addDays(new Date(), i), 'yyyy-MM-dd');
+                const numTasks = Math.max(1, Math.floor(dailyMinutes / 30));
+                
+                for (let j = 0; j < numTasks; j++) {
+                    tasks.push({
+                        id: `task-${i}-${j}-${Date.now()}`,
+                        date: currentDate,
+                        title: `${subject} Module ${i + 1}.${j + 1}`,
+                        durationMins: Math.floor(dailyMinutes / numTasks),
+                        status: 'pending',
+                        subtasks: [
+                            { id: `s1-${i}-${j}`, title: 'Review core concepts', isCompleted: false },
+                            { id: `s2-${i}-${j}`, title: 'Complete practice exercise', isCompleted: false },
+                            { id: `s3-${i}-${j}`, title: 'Write summary notes', isCompleted: false }
+                        ]
+                    });
+                }
+            }
+            
+            return tasks;
+        };
+        
+        const generateInsights = (stats, todayHistory = null) => {
+            const { consistencyScore, currentStreak, trustScore } = stats;
+            
+            if (trustScore < 50) return "⚠️ Low engagement detected. Increase interaction to improve credibility.";
+            if (trustScore < 80) return "👀 Tab switching detected. Stay focused to maintain Trust Score.";
+            if (consistencyScore < 50) return "📉 Inconsistent pattern detected. Let's start with one micro-task today.";
+            if (currentStreak > 3) return "🔥 Strong consistency detected. System confidence increasing.";
+            
+            return "Great job keeping up with your schedule!";
+        };
+
+        
+        // Layout Component
+        function Layout({ children }) {
+            return React.createElement('div', { className: 'layout' },
+                React.createElement('header', { style: { marginBottom: '2.5rem', textAlign: 'center' } },
+                    React.createElement('div', { style: { display: 'inline-flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' } },
+                        React.createElement('div', { 
+                            style: { 
+                                padding: '0.75rem', 
+                                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%)', 
+                                borderRadius: '12px',
+                                border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }
+                        }, React.createElement(Brain, { size: 32, color: 'var(--accent-primary)' })),
+                        React.createElement('h1', { style: { fontWeight: '700', letterSpacing: '-1px', fontSize: '2.5rem', margin: 0 } },
+                            React.createElement('span', { style: { color: 'var(--accent-primary)' } }, 'AI'),
+                            ' Learning Coach'
+                        )
+                    ),
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.95rem' } },
+                        React.createElement(Shield, { size: 16, color: 'var(--accent-secondary)' }),
+                        React.createElement('p', { style: { margin: 0 } }, 'Behavior-Aware • Authenticity Tracking • Adaptive Planning')
+                    )
+                ),
+                React.createElement('main', { className: 'glass-panel fade-in', style: { padding: '2rem', minHeight: '60vh' } },
+                    children
+                ),
+                React.createElement('footer', { style: { textAlign: 'center', marginTop: '2rem', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' } },
+                    React.createElement('p', null, 'Powered by behavioral intelligence • Not just planning, but genuine learning')
+                )
+            );
+        }
+        
+        // PlanForm Component
+        function PlanForm({ onGenerate }) {
+            const [subject, setSubject] = useState('');
+            const [deadline, setDeadline] = useState('');
+            const [dailyMinutes, setDailyMinutes] = useState(60);
+            const [difficulty, setDifficulty] = useState('medium');
+            const [isLoading, setIsLoading] = useState(false);
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                
+                await onGenerate({
+                    subject,
+                    deadline,
+                    dailyMinutes: parseInt(dailyMinutes, 10),
+                    difficulty
+                });
+                
+                setIsLoading(false);
+            };
+            
+            return React.createElement('form', { onSubmit: handleSubmit, style: { display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '500px', margin: '0 auto' } },
+                React.createElement('h2', { style: { textAlign: 'center', marginBottom: '1rem' } }, "Let's build your plan"),
+                
+                React.createElement('div', null,
+                    React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' } }, 'What subject do you want to learn?'),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: subject,
+                        onChange: (e) => setSubject(e.target.value),
+                        placeholder: 'e.g. Data Structures & Algorithms',
+                        required: true,
+                        style: { width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
+                    })
+                ),
+                
+                React.createElement('div', null,
+                    React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' } }, 'When is your goal deadline?'),
+                    React.createElement('input', {
+                        type: 'date',
+                        value: deadline,
+                        onChange: (e) => setDeadline(e.target.value),
+                        min: new Date().toISOString().split('T')[0],
+                        required: true,
+                        style: { width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', colorScheme: 'dark' }
+                    })
+                ),
+                
+                React.createElement('div', { style: { display: 'flex', gap: '1rem' } },
+                    React.createElement('div', { style: { flex: 1 } },
+                        React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' } }, 'Daily Mins'),
+                        React.createElement('input', {
+                            type: 'number',
+                            value: dailyMinutes,
+                            onChange: (e) => setDailyMinutes(e.target.value),
+                            min: '10',
+                            max: '480',
+                            required: true,
+                            style: { width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
+                        })
+                    ),
+                    React.createElement('div', { style: { flex: 1 } },
+                        React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' } }, 'Intensity'),
+                        React.createElement('select', {
+                            value: difficulty,
+                            onChange: (e) => setDifficulty(e.target.value),
+                            style: { width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
+                        },
+                            React.createElement('option', { value: 'easy' }, 'Easy (More breaks)'),
+                            React.createElement('option', { value: 'medium' }, 'Medium'),
+                            React.createElement('option', { value: 'hard' }, 'Hard (Fewer breaks)')
+                        )
+                    )
+                ),
+                
+                React.createElement('button', {
+                    type: 'submit',
+                    disabled: isLoading,
+                    style: {
+                        marginTop: '1rem',
+                        padding: '1rem',
+                        background: 'var(--accent-primary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: isLoading ? 'wait' : 'pointer',
+                        transition: 'background 0.2s',
+                        opacity: isLoading ? 0.7 : 1
+                    }
+                }, isLoading ? 'Generating AI Plan...' : 'Generate Study Plan')
+            );
+        }
+
+        
+        // AnimatedNumber Component
+        function AnimatedNumber({ value }) {
+            const [display, setDisplay] = useState(value);
+            
+            useEffect(() => {
+                let start = display;
+                const end = value;
+                if (start === end) return;
+                
+                const duration = 800;
+                let startTimestamp = null;
+                
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    setDisplay(Math.floor(progress * (end - start) + start));
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        setDisplay(end);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }, [value]);
+            
+            return React.createElement(React.Fragment, null, display);
+        }
+        
+        // ProgressWidgets Component
+        function ProgressWidgets({ stats, lastTrustChange = 0 }) {
+            const trustScore = stats.trustScore ?? 100;
+            const [feedbackMessage, setFeedbackMessage] = useState('');
+            const [showFeedback, setShowFeedback] = useState(false);
+            const [pulseClass, setPulseClass] = useState('');
+            
+            useEffect(() => {
+                setPulseClass('pulse-animation');
+                const timer = setTimeout(() => setPulseClass(''), 600);
+                return () => clearTimeout(timer);
+            }, [trustScore]);
+            
+            useEffect(() => {
+                if (lastTrustChange !== 0) {
+                    if (lastTrustChange > 10) {
+                        setFeedbackMessage('🔥 Strong consistency detected!');
+                    } else if (lastTrustChange > 0) {
+                        setFeedbackMessage('✓ Good progress!');
+                    } else if (lastTrustChange < -10) {
+                        setFeedbackMessage('⚠️ Low engagement detected');
+                    } else if (lastTrustChange < 0) {
+                        setFeedbackMessage('⚠️ Trust decreased');
+                    }
+                    
+                    setShowFeedback(true);
+                    const timer = setTimeout(() => setShowFeedback(false), 3000);
+                    return () => clearTimeout(timer);
+                }
+            }, [lastTrustChange]);
+            
+            let riskLevel = 'Low';
+            let riskColor = 'var(--accent-secondary)';
+            if (trustScore <= 50) {
+                riskLevel = 'High';
+                riskColor = 'var(--danger)';
+            } else if (trustScore < 80) {
+                riskLevel = 'Medium';
+                riskColor = 'var(--warning)';
+            }
+            
+            const recentHistory = (stats.history || []).slice(-5);
+            const avgInteractions = recentHistory.length > 0
+                ? recentHistory.reduce((acc, h) => acc + (h.interactions || 0), 0) / recentHistory.length
+                : 5;
+            
+            let engagementLevel = 'Medium';
+            if (avgInteractions >= 10) engagementLevel = 'High';
+            else if (avgInteractions < 3) engagementLevel = 'Low';
+            
+            return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' } },
+                React.createElement('div', { 
+                    className: `glass-panel ${pulseClass}`, 
+                    style: { 
+                        padding: '2rem', 
+                        border: `1px solid ${riskColor}`, 
+                        background: 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.98) 100%)', 
+                        position: 'relative', 
+                        overflow: 'hidden', 
+                        transition: 'border-color 0.5s ease' 
+                    }
+                },
+                    React.createElement('div', { style: { position: 'absolute', top: 0, left: 0, width: '6px', height: '100%', background: riskColor, transition: 'background 0.5s ease' } }),
+                    React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' } },
+                        React.createElement('div', { style: { flex: 1, minWidth: '250px' } },
+                            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' } },
+                                React.createElement('div', { style: { padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', color: riskColor, transition: 'color 0.5s ease' } },
+                                    riskLevel === 'High' ? React.createElement(ShieldAlert, { size: 36 }) : React.createElement(ShieldCheck, { size: 36 })
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('h2', { style: { fontSize: '1.5rem', color: 'var(--text-main)', margin: 0, fontWeight: '700', letterSpacing: '-0.5px' } }, 'Learning Credibility'),
+                                    React.createElement('p', { style: { color: 'var(--text-muted)', fontSize: '0.9rem' } }, 'Behavioral Authenticity Engine')
+                                )
+                            ),
+                            React.createElement('div', { style: { marginTop: '1.5rem', padding: '0.75rem 1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', borderLeft: `3px solid ${riskColor}`, transition: 'border-color 0.5s ease' } },
+                                React.createElement('p', { style: { margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                                    React.createElement(Activity, { size: 16, color: riskColor }),
+                                    React.createElement('span', { style: { color: 'var(--text-muted)' } }, 'System confidence:'),
+                                    React.createElement('strong', { style: { color: riskColor } }, React.createElement(AnimatedNumber, { value: trustScore }), '%'),
+                                    React.createElement('span', { style: { color: 'var(--text-muted)' } }, 'that learning is genuine.')
+                                )
+                            ),
+                            showFeedback && React.createElement('div', {
+                                className: 'fade-in',
+                                style: {
+                                    marginTop: '1rem',
+                                    padding: '0.75rem 1rem',
+                                    background: lastTrustChange > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                    border: `1px solid ${lastTrustChange > 0 ? 'var(--accent-secondary)' : 'var(--danger)'}`,
+                                    borderRadius: '8px',
+                                    color: lastTrustChange > 0 ? 'var(--accent-secondary)' : 'var(--danger)',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                    textAlign: 'center'
+                                }
+                            }, feedbackMessage)
+                        ),
+                        React.createElement('div', { style: { display: 'flex', gap: '1.5rem', flexWrap: 'wrap' } },
+                            React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', minWidth: '120px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)' } },
+                                React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem', letterSpacing: '1px' } }, 'Authentic'),
+                                React.createElement('p', { style: { fontSize: '2.5rem', fontWeight: '800', color: riskColor, margin: 0, lineHeight: 1, transition: 'color 0.5s ease' } }, React.createElement(AnimatedNumber, { value: trustScore }), '%')
+                            ),
+                            React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', minWidth: '120px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)' } },
+                                React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem', letterSpacing: '1px' } }, 'Engagement'),
+                                React.createElement('p', { style: { fontSize: '1.5rem', fontWeight: '700', marginTop: '0.5rem', color: engagementLevel === 'High' ? 'var(--accent-secondary)' : engagementLevel === 'Low' ? 'var(--danger)' : 'var(--warning)', transition: 'color 0.5s ease' } }, engagementLevel)
+                            ),
+                            React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', minWidth: '120px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)' } },
+                                React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem', letterSpacing: '1px' } }, 'Risk Level'),
+                                React.createElement('p', { style: { fontSize: '1.5rem', fontWeight: '700', marginTop: '0.5rem', color: riskColor, transition: 'color 0.5s ease' } }, riskLevel)
+                            )
+                        )
+                    )
+                ),
+                React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' } },
+                    React.createElement('div', { className: 'glass-panel', style: { padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' } },
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                            React.createElement(Flame, { size: 20, color: 'var(--warning)' }),
+                            React.createElement('span', { style: { color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' } }, 'Streak')
+                        ),
+                        React.createElement('p', { style: { fontSize: '1.5rem', fontWeight: 'bold' } }, 
+                            React.createElement(AnimatedNumber, { value: stats.currentStreak }), 
+                            ' ', 
+                            React.createElement('span', { style: { fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' } }, 'days')
+                        )
+                    ),
+                    React.createElement('div', { className: 'glass-panel', style: { padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' } },
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                            React.createElement(Target, { size: 20, color: 'var(--accent-primary)' }),
+                            React.createElement('span', { style: { color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' } }, 'Consistency')
+                        ),
+                        React.createElement('div', { style: { width: '100%' } },
+                            React.createElement('p', { style: { fontSize: '1.5rem', fontWeight: 'bold' } }, React.createElement(AnimatedNumber, { value: stats.consistencyScore }), '%'),
+                            React.createElement('div', { style: { width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', marginTop: '0.25rem', overflow: 'hidden' } },
+                                React.createElement('div', { style: { height: '100%', width: `${stats.consistencyScore}%`, background: 'var(--accent-primary)', transition: 'width 0.5s ease-out' } })
+                            )
+                        )
+                    ),
+                    React.createElement('div', { className: 'glass-panel', style: { padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' } },
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                            React.createElement(Trophy, { size: 20, color: 'var(--accent-secondary)' }),
+                            React.createElement('span', { style: { color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' } }, 'Tasks Done')
+                        ),
+                        React.createElement('div', null,
+                            React.createElement('p', { style: { fontSize: '1.5rem', fontWeight: 'bold' } }, 
+                                React.createElement(AnimatedNumber, { value: stats.totalTasksCompleted }),
+                                React.createElement('span', { style: { fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' } }, `/${stats.totalTasksAssigned}`)
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        
+        // InsightsPanel Component
+        function InsightsPanel({ message }) {
+            if (!message) return null;
+            
+            return React.createElement('div', { 
+                className: 'glass-panel', 
+                style: { padding: '1.5rem', marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-primary)', background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.7) 100%)' }
+            },
+                React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: '1rem' } },
+                    React.createElement(Sparkles, { color: 'var(--accent-primary)', style: { marginTop: '0.25rem' } }),
+                    React.createElement('div', null,
+                        React.createElement('h4', { style: { marginBottom: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' } }, 'AI Coach Insight'),
+                        React.createElement('p', { style: { lineHeight: '1.6' } }, message)
+                    )
+                )
+            );
+        }
+        
+        // DailyTasks Component
+        function DailyTasks({ tasks, onToggleStatus, onStartSession, onToggleSubtask, activeTaskId }) {
+            if (!tasks || tasks.length === 0) {
+                return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', textAlign: 'center' } },
+                    React.createElement('h3', { style: { marginBottom: '0.5rem' } }, 'Sweet! No tasks for today.'),
+                    React.createElement('p', { style: { color: 'var(--text-muted)' } }, 'Take a well-deserved break or review past material.')
+                );
+            }
+            
+            return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem' } },
+                React.createElement('h3', { style: { marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } }, "Today's Focus"),
+                React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '1rem' } },
+                    tasks.map(task => {
+                        const isCompleted = task.status === 'completed';
+                        const isActive = activeTaskId === task.id;
+                        
+                        return React.createElement('div', {
+                            key: task.id,
+                            style: {
+                                padding: '1rem',
+                                borderRadius: '8px',
+                                background: isCompleted ? 'rgba(16, 185, 129, 0.05)' : isActive ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+                                border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : isActive ? 'rgba(59, 130, 246, 0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                transition: 'all 0.2s ease-in-out',
+                                opacity: isCompleted && !isActive ? 0.8 : 1
+                            }
+                        },
+                            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' } },
+                                React.createElement('div', { style: { flex: 1, display: 'flex', gap: '1rem', alignItems: 'center' } },
+                                    React.createElement('div', {
+                                        onClick: () => isCompleted ? onToggleStatus(task.id, 'pending') : null,
+                                        style: { cursor: isCompleted ? 'pointer' : 'not-allowed', opacity: isCompleted ? 1 : 0.4 },
+                                        title: !isCompleted ? "You must complete this task via an active study session" : "Revoke completion"
+                                    },
+                                        isCompleted ? React.createElement(CheckCircle2, { color: 'var(--accent-secondary)' }) : React.createElement(Circle, { color: 'var(--text-muted)' })
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('p', {
+                                            style: {
+                                                fontWeight: '600', fontSize: '1.1rem',
+                                                textDecoration: isCompleted ? 'line-through' : 'none',
+                                                color: isCompleted ? 'var(--text-muted)' : 'var(--text-main)'
+                                            }
+                                        }, task.title),
+                                        React.createElement('span', { style: { fontSize: '0.85rem', color: 'var(--text-muted)' } },
+                                            `Target: ${task.durationMins} mins • ${task.type === 'revision' ? 'Revision' : 'Study'}`
+                                        )
+                                    )
+                                ),
+                                !isCompleted && !isActive && React.createElement('button', {
+                                    onClick: () => onStartSession(task),
+                                    style: { display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }
+                                },
+                                    React.createElement(PlayCircle, { size: 16 }), ' Start'
+                                ),
+                                isActive && React.createElement('span', { style: { color: 'var(--accent-primary)', fontWeight: 'bold', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                                    React.createElement(PlayCircle, { size: 16 }), ' In Progress'
+                                )
+                            ),
+                            task.subtasks && task.subtasks.length > 0 && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '0.5rem', marginLeft: '2.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' } },
+                                task.subtasks.map(sub => React.createElement('div', {
+                                    key: sub.id,
+                                    onClick: () => onToggleSubtask && onToggleSubtask(task.id, sub.id),
+                                    style: { display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }
+                                },
+                                    React.createElement('div', null,
+                                        sub.isCompleted ? React.createElement(CheckSquare, { size: 16, color: 'var(--accent-secondary)' }) : React.createElement(Square, { size: 16, color: 'var(--text-muted)' })
+                                    ),
+                                    React.createElement('span', { style: { fontSize: '0.9rem', color: sub.isCompleted ? 'var(--text-muted)' : 'var(--text-main)', textDecoration: sub.isCompleted ? 'line-through' : 'none', opacity: sub.isCompleted ? 0.7 : 1 } },
+                                        sub.title
+                                    )
+                                ))
+                            )
+                        );
+                    })
+                )
+            );
+        }
+
+        
+        // PresenceCheckModal Component
+        function PresenceCheckModal({ subtasks, onRespond, onTimeout }) {
+            const [timeLeft, setTimeLeft] = useState(20);
+            const [selectedAnswer, setSelectedAnswer] = useState('');
+            const [customAnswer, setCustomAnswer] = useState('');
+            
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setTimeLeft(prev => {
+                        if (prev <= 1) {
+                            clearInterval(timer);
+                            onTimeout();
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+                
+                return () => clearInterval(timer);
+            }, [onTimeout]);
+            
+            const handleSubmit = () => {
+                const answer = selectedAnswer === 'custom' ? customAnswer : selectedAnswer;
+                if (answer.trim()) {
+                    onRespond(answer);
+                }
+            };
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0,0,0,0.9)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    animation: 'fadeIn 0.3s'
+                }
+            },
+                React.createElement('div', {
+                    className: 'glass-panel pulse-animation',
+                    style: {
+                        padding: '2.5rem',
+                        maxWidth: '500px',
+                        width: '90%',
+                        border: '2px solid var(--warning)',
+                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(30, 41, 59, 0.95) 100%)'
+                    }
+                },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' } },
+                        React.createElement('div', { style: { padding: '0.75rem', background: 'rgba(245, 158, 11, 0.2)', borderRadius: '12px' } },
+                            React.createElement(AlertCircle, { size: 32, color: 'var(--warning)' })
+                        ),
+                        React.createElement('div', { style: { flex: 1 } },
+                            React.createElement('h2', { style: { margin: 0, color: 'var(--warning)', fontSize: '1.5rem' } }, 'Active Presence Check'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, "Verify you're actively studying")
+                        ),
+                        React.createElement('div', {
+                            style: {
+                                padding: '0.5rem 1rem',
+                                background: timeLeft <= 5 ? 'var(--danger)' : 'rgba(245, 158, 11, 0.2)',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                animation: timeLeft <= 5 ? 'pulse-glow 0.5s infinite' : 'none'
+                            }
+                        },
+                            React.createElement(Clock, { size: 18, color: timeLeft <= 5 ? 'white' : 'var(--warning)' }),
+                            React.createElement('span', { style: { fontWeight: 'bold', fontSize: '1.2rem', color: timeLeft <= 5 ? 'white' : 'var(--warning)' } }, `${timeLeft}s`)
+                        )
+                    ),
+                    React.createElement('div', {
+                        style: {
+                            padding: '1rem',
+                            background: 'rgba(245, 158, 11, 0.1)',
+                            border: '1px solid var(--warning)',
+                            borderRadius: '8px',
+                            marginBottom: '1.5rem'
+                        }
+                    },
+                        React.createElement('p', { style: { margin: 0, fontSize: '1rem', color: 'var(--text-main)', fontWeight: '600' } }, 'What are you currently studying?')
+                    ),
+                    React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' } },
+                        subtasks.map(sub => React.createElement('label', {
+                            key: sub.id,
+                            style: {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                padding: '0.75rem',
+                                background: selectedAnswer === sub.title ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+                                border: selectedAnswer === sub.title ? '1px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }
+                        },
+                            React.createElement('input', {
+                                type: 'radio',
+                                name: 'presence',
+                                value: sub.title,
+                                checked: selectedAnswer === sub.title,
+                                onChange: (e) => setSelectedAnswer(e.target.value),
+                                style: { cursor: 'pointer' }
+                            }),
+                            React.createElement('span', { style: { fontSize: '0.95rem' } }, sub.title)
+                        )),
+                        React.createElement('label', {
+                            style: {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                padding: '0.75rem',
+                                background: selectedAnswer === 'custom' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+                                border: selectedAnswer === 'custom' ? '1px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }
+                        },
+                            React.createElement('input', {
+                                type: 'radio',
+                                name: 'presence',
+                                value: 'custom',
+                                checked: selectedAnswer === 'custom',
+                                onChange: (e) => setSelectedAnswer(e.target.value),
+                                style: { cursor: 'pointer' }
+                            }),
+                            React.createElement('span', { style: { fontSize: '0.95rem' } }, 'Other (specify below)')
+                        ),
+                        selectedAnswer === 'custom' && React.createElement('input', {
+                            type: 'text',
+                            value: customAnswer,
+                            onChange: (e) => setCustomAnswer(e.target.value),
+                            placeholder: 'What are you studying right now?',
+                            autoFocus: true,
+                            style: {
+                                width: '100%',
+                                padding: '0.75rem',
+                                background: 'rgba(0,0,0,0.3)',
+                                border: '1px solid var(--accent-primary)',
+                                borderRadius: '8px',
+                                color: 'white',
+                                fontSize: '0.95rem'
+                            }
+                        })
+                    ),
+                    React.createElement('button', {
+                        onClick: handleSubmit,
+                        disabled: !selectedAnswer || (selectedAnswer === 'custom' && !customAnswer.trim()),
+                        style: {
+                            width: '100%',
+                            padding: '1rem',
+                            background: (!selectedAnswer || (selectedAnswer === 'custom' && !customAnswer.trim())) ? 'rgba(255,255,255,0.1)' : 'var(--accent-primary)',
+                            color: (!selectedAnswer || (selectedAnswer === 'custom' && !customAnswer.trim())) ? 'rgba(255,255,255,0.3)' : 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            cursor: (!selectedAnswer || (selectedAnswer === 'custom' && !customAnswer.trim())) ? 'not-allowed' : 'pointer',
+                            fontSize: '1rem'
+                        }
+                    }, "Confirm I'm Studying"),
+                    React.createElement('p', { style: { marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' } }, "⚠️ Ignoring this check will reduce your trust score")
+                )
+            );
+        }
+
+        
+        // Timer Component (simplified for single file)
+        function Timer({ activeTask, onStop }) {
+            const [seconds, setSeconds] = useState(0);
+            const [isActive, setIsActive] = useState(false);
+            const [tabSwitches, setTabSwitches] = useState(0);
+            const [interactions, setInteractions] = useState(0);
+            const [localSubtasks, setLocalSubtasks] = useState(() => activeTask?.subtasks || []);
+            const [showPresenceCheck, setShowPresenceCheck] = useState(false);
+            const [presenceChecksPassed, setPresenceChecksPassed] = useState(0);
+            const [presenceChecksFailed, setPresenceChecksFailed] = useState(0);
+            const [inactiveSeconds, setInactiveSeconds] = useState(0);
+            const [lastInteractionTime, setLastInteractionTime] = useState(Date.now());
+            const [warnings, setWarnings] = useState([]);
+            const [confidenceDecay, setConfidenceDecay] = useState(0);
+            
+            const nextPresenceCheckRef = useRef(null);
+            const inactivityTimerRef = useRef(null);
+            
+            useEffect(() => {
+                setLocalSubtasks(activeTask?.subtasks || []);
+                setSeconds(0);
+                setTabSwitches(0);
+                setInteractions(0);
+                setIsActive(false);
+                setPresenceChecksPassed(0);
+                setPresenceChecksFailed(0);
+                setInactiveSeconds(0);
+                setWarnings([]);
+                setConfidenceDecay(0);
+                setLastInteractionTime(Date.now());
+            }, [activeTask?.id]);
+            
+            useEffect(() => {
+                const handleVisibilityChange = () => {
+                    if (document.hidden && isActive) {
+                        setTabSwitches(prev => prev + 1);
+                    }
+                };
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+                return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }, [isActive]);
+            
+            useEffect(() => {
+                let interval = null;
+                if (isActive) {
+                    interval = setInterval(() => {
+                        setSeconds(s => s + 1);
+                    }, 1000);
+                    
+                    const schedulePresenceCheck = () => {
+                        const randomDelay = (180 + Math.random() * 180) * 1000;
+                        nextPresenceCheckRef.current = setTimeout(() => {
+                            setShowPresenceCheck(true);
+                            setIsActive(false);
+                        }, randomDelay);
+                    };
+                    
+                    if (!nextPresenceCheckRef.current) {
+                        schedulePresenceCheck();
+                    }
+                } else {
+                    clearInterval(interval);
+                    if (nextPresenceCheckRef.current) {
+                        clearTimeout(nextPresenceCheckRef.current);
+                        nextPresenceCheckRef.current = null;
+                    }
+                }
+                return () => {
+                    clearInterval(interval);
+                    if (nextPresenceCheckRef.current) {
+                        clearTimeout(nextPresenceCheckRef.current);
+                    }
+                };
+            }, [isActive]);
+            
+            useEffect(() => {
+                if (!isActive) return;
+                
+                inactivityTimerRef.current = setInterval(() => {
+                    const timeSinceLastInteraction = Date.now() - lastInteractionTime;
+                    const inactiveMinutes = Math.floor(timeSinceLastInteraction / 60000);
+                    
+                    if (timeSinceLastInteraction > 120000) {
+                        setInactiveSeconds(prev => prev + 1);
+                        setConfidenceDecay(prev => prev + 0.5);
+                        
+                        if (inactiveMinutes >= 2 && !warnings.includes('inactive')) {
+                            setWarnings(prev => [...prev, 'inactive']);
+                        }
+                    }
+                }, 1000);
+                
+                return () => {
+                    if (inactivityTimerRef.current) {
+                        clearInterval(inactivityTimerRef.current);
+                    }
+                };
+            }, [isActive, lastInteractionTime, warnings]);
+            
+            if (!activeTask) return null;
+            
+            const handleStop = () => {
+                setIsActive(false);
+                onStop({
+                    seconds,
+                    tabSwitches,
+                    interactions,
+                    completedSubtasks: localSubtasks,
+                    presenceChecksPassed,
+                    presenceChecksFailed,
+                    inactiveSeconds,
+                    confidenceDecay,
+                    warnings: warnings.length
+                });
+            };
+            
+            const handlePresenceCheckRespond = (answer) => {
+                setShowPresenceCheck(false);
+                setPresenceChecksPassed(prev => prev + 1);
+                setIsActive(true);
+                nextPresenceCheckRef.current = null;
+            };
+            
+            const handlePresenceCheckTimeout = () => {
+                setShowPresenceCheck(false);
+                setPresenceChecksFailed(prev => prev + 1);
+                setConfidenceDecay(prev => prev + 20);
+                setWarnings(prev => [...prev, 'presence-failed']);
+                setIsActive(true);
+                nextPresenceCheckRef.current = null;
+            };
+            
+            const formatTime = (totalSeconds) => {
+                const min = Math.floor(totalSeconds / 60);
+                const sec = totalSeconds % 60;
+                return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            };
+            
+            const handleTrackInteraction = () => {
+                if (isActive) {
+                    setInteractions(prev => prev + 1);
+                    setLastInteractionTime(Date.now());
+                    
+                    if (warnings.includes('inactive')) {
+                        setWarnings(prev => prev.filter(w => w !== 'inactive'));
+                    }
+                }
+            };
+            
+            const toggleSubtask = (id) => {
+                handleTrackInteraction();
+                
+                const currentIndex = localSubtasks.findIndex(s => s.id === id);
+                if (currentIndex > 0) {
+                    const previousCompleted = localSubtasks.slice(0, currentIndex).every(s => s.isCompleted);
+                    if (!previousCompleted) {
+                        setWarnings(prev => [...prev, 'unlock-order']);
+                        setTimeout(() => {
+                            setWarnings(prev => prev.filter(w => w !== 'unlock-order'));
+                        }, 3000);
+                        return;
+                    }
+                }
+                
+                setLocalSubtasks(prev => prev.map(s => s.id === id ? { ...s, isCompleted: !s.isCompleted } : s));
+            };
+            
+            return React.createElement(React.Fragment, null,
+                showPresenceCheck && React.createElement(PresenceCheckModal, {
+                    subtasks: localSubtasks,
+                    onRespond: handlePresenceCheckRespond,
+                    onTimeout: handlePresenceCheckTimeout
+                }),
+                React.createElement('div', { 
+                    className: 'glass-panel', 
+                    style: { padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--accent-primary)', background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 41, 59, 0.8) 100%)' },
+                    onClick: handleTrackInteraction
+                },
+                    React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' } },
+                        React.createElement('div', { style: { flex: 1, minWidth: '300px' } },
+                            React.createElement('h3', { style: { display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', marginBottom: '0.75rem' } },
+                                React.createElement(Clock, { size: 20, color: 'var(--accent-primary)' }), ' ', activeTask.title
+                            ),
+                            React.createElement('p', { style: { fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' } }, 
+                                `Target: ${activeTask.durationMins} mins • Stay focused! Activity is being monitored.`
+                            ),
+                            localSubtasks.length > 0 && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' } },
+                                React.createElement('h4', { style: { fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem' } }, 'Session Tasks'),
+                                localSubtasks.map(sub => React.createElement('div', {
+                                    key: sub.id,
+                                    onClick: () => toggleSubtask(sub.id),
+                                    style: { display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }
+                                },
+                                    React.createElement('div', null,
+                                        sub.isCompleted ? React.createElement(CheckSquare, { size: 18, color: 'var(--accent-secondary)' }) : React.createElement(SquareIcon, { size: 18, color: 'var(--text-muted)' })
+                                    ),
+                                    React.createElement('span', { style: { fontSize: '0.95rem', color: sub.isCompleted ? 'var(--text-muted)' : 'var(--text-main)', textDecoration: sub.isCompleted ? 'line-through' : 'none' } },
+                                        sub.title
+                                    )
+                                ))
+                            ),
+                            React.createElement('textarea', {
+                                placeholder: 'Type your notes or scratchpad here to stay active...',
+                                onChange: handleTrackInteraction,
+                                style: { width: '100%', height: '80px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.75rem', color: 'white', fontFamily: 'inherit', resize: 'none' }
+                            })
+                        ),
+                        React.createElement('div', { style: { textAlign: 'center', minWidth: '150px', background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' } },
+                            React.createElement('div', { style: { fontSize: '3rem', fontWeight: 'bold', fontFamily: 'monospace', textShadow: isActive ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none', color: isActive ? 'var(--text-main)' : 'var(--text-muted)' } },
+                                formatTime(seconds)
+                            ),
+                            React.createElement('div', { style: { marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' } },
+                                tabSwitches > 0 && React.createElement('p', { style: { color: 'var(--warning)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' } },
+                                    React.createElement(AlertTriangle, { size: 12 }), ` Tab: ${tabSwitches}x`
+                                ),
+                                warnings.includes('inactive') && React.createElement('p', { style: { color: 'var(--danger)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' } },
+                                    React.createElement(EyeOff, { size: 12 }), ' Inactive detected'
+                                ),
+                                warnings.includes('presence-failed') && React.createElement('p', { style: { color: 'var(--danger)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' } },
+                                    React.createElement(AlertTriangle, { size: 12 }), ' Check failed'
+                                ),
+                                warnings.includes('unlock-order') && React.createElement('p', { style: { color: 'var(--warning)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' } },
+                                    React.createElement(AlertTriangle, { size: 12 }), ' Complete in order'
+                                ),
+                                presenceChecksPassed > 0 && React.createElement('p', { style: { color: 'var(--accent-secondary)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' } },
+                                    React.createElement(Activity, { size: 12 }), ` Verified: ${presenceChecksPassed}x`
+                                )
+                            ),
+                            React.createElement('div', { style: { display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1rem' } },
+                                !isActive ? React.createElement('button', { 
+                                    onClick: () => setIsActive(true), 
+                                    style: { background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '50%', cursor: 'pointer', transition: 'transform 0.1s' }
+                                }, React.createElement(Play, { size: 24 })) : React.createElement('button', { 
+                                    onClick: () => setIsActive(false), 
+                                    style: { background: 'var(--warning)', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '50%', cursor: 'pointer', transition: 'transform 0.1s' }
+                                }, React.createElement(Pause, { size: 24 })),
+                                React.createElement('button', { 
+                                    onClick: handleStop, 
+                                    disabled: seconds === 0, 
+                                    style: { background: seconds === 0 ? 'rgba(255,255,255,0.1)' : 'var(--danger)', color: seconds === 0 ? 'rgba(255,255,255,0.3)' : 'white', border: 'none', padding: '0.75rem', borderRadius: '50%', cursor: seconds === 0 ? 'not-allowed' : 'pointer' }
+                                }, React.createElement(SquareIcon, { size: 24 }))
+                            ),
+                            React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem' } }, `Interactions: ${interactions}`)
+                        )
+                    ),
+                    (warnings.includes('inactive') || inactiveSeconds > 120) && React.createElement('div', {
+                        style: {
+                            marginTop: '1rem',
+                            padding: '1rem',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid var(--danger)',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            animation: 'pulse-glow 1s infinite'
+                        }
+                    },
+                        React.createElement(EyeOff, { size: 20, color: 'var(--danger)' }),
+                        React.createElement('div', null,
+                            React.createElement('p', { style: { margin: 0, fontWeight: 'bold', color: 'var(--danger)' } }, '⚠️ Session Appears Inactive'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } },
+                                `No interaction detected for ${Math.floor(inactiveSeconds / 60)} minutes. Your trust score is decreasing.`
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        
+        // ConsistencyHeatmap Component
+        function ConsistencyHeatmap({ history, days = 14 }) {
+            const today = startOfDay(new Date());
+            const dateRange = Array.from({ length: days }, (_, i) => {
+                return format(subDays(today, days - 1 - i), 'yyyy-MM-dd');
+            });
+            
+            const historyMap = {};
+            try {
+                (history || []).forEach(h => {
+                    if (h && h.date) {
+                        historyMap[h.date] = h;
+                    }
+                });
+            } catch (error) {
+                console.error('Error processing history:', error);
+            }
+            
+            const getColor = (date) => {
+                const dayData = historyMap[date];
+                
+                if (!dayData) {
+                    if (new Date(date) > today) {
+                        return 'rgba(255,255,255,0.05)';
+                    }
+                    return 'rgba(239, 68, 68, 0.3)';
+                }
+                
+                if (dayData.status === 'completed') {
+                    const quality = ((dayData.focusScore || 70) + (dayData.trustScore || 70)) / 2;
+                    
+                    if (quality >= 75) {
+                        return 'var(--accent-secondary)';
+                    } else if (quality >= 50) {
+                        return 'var(--warning)';
+                    } else {
+                        return 'rgba(239, 68, 68, 0.6)';
+                    }
+                }
+                
+                return 'rgba(239, 68, 68, 0.3)';
+            };
+            
+            const getLabel = (date) => {
+                const dayData = historyMap[date];
+                
+                if (!dayData) {
+                    if (new Date(date) > today) return 'Future';
+                    return 'Missed';
+                }
+                
+                if (dayData.status === 'completed') {
+                    const quality = ((dayData.focusScore || 70) + (dayData.trustScore || 70)) / 2;
+                    return `${Math.round(quality)}%`;
+                }
+                
+                return 'Missed';
+            };
+            
+            return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem' } },
+                React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' } },
+                    React.createElement(Calendar, { size: 20, color: 'var(--accent-primary)' }),
+                    React.createElement('h3', { style: { margin: 0, fontSize: '1rem', color: 'var(--text-main)' } }, 'Consistency Heatmap')
+                ),
+                React.createElement('div', { style: { display: 'grid', gridTemplateColumns: `repeat(${Math.min(days, 7)}, 1fr)`, gap: '0.5rem', marginBottom: '1rem' } },
+                    dateRange.map((date, idx) => {
+                        const dayOfWeek = format(new Date(date), 'EEE');
+                        const dayOfMonth = format(new Date(date), 'd');
+                        const color = getColor(date);
+                        const label = getLabel(date);
+                        
+                        return React.createElement('div', {
+                            key: date,
+                            style: {
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.25rem'
+                            }
+                        },
+                            React.createElement('span', { style: { fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' } }, dayOfWeek),
+                            React.createElement('div', {
+                                style: {
+                                    width: '100%',
+                                    aspectRatio: '1',
+                                    background: color,
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    color: color === 'rgba(255,255,255,0.05)' ? 'var(--text-muted)' : 'white',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    transition: 'transform 0.2s',
+                                    cursor: 'pointer'
+                                },
+                                title: `${date}: ${label}`,
+                                onMouseEnter: (e) => e.currentTarget.style.transform = 'scale(1.1)',
+                                onMouseLeave: (e) => e.currentTarget.style.transform = 'scale(1)'
+                            }, dayOfMonth)
+                        );
+                    })
+                ),
+                React.createElement('div', { style: { display: 'flex', justifyContent: 'center', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                        React.createElement('div', { style: { width: '12px', height: '12px', background: 'var(--accent-secondary)', borderRadius: '3px' } }),
+                        React.createElement('span', null, 'Excellent')
+                    ),
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                        React.createElement('div', { style: { width: '12px', height: '12px', background: 'var(--warning)', borderRadius: '3px' } }),
+                        React.createElement('span', null, 'Partial')
+                    ),
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                        React.createElement('div', { style: { width: '12px', height: '12px', background: 'rgba(239, 68, 68, 0.6)', borderRadius: '3px' } }),
+                        React.createElement('span', null, 'Missed')
+                    )
+                )
+            );
+        }
+        
+        // BehavioralInsights Component
+        function BehavioralInsights({ stats, history }) {
+            const getBestStudyTime = () => {
+                if (!history || history.length < 3) return null;
+                
+                try {
+                    const timeSlots = {};
+                    history.forEach(h => {
+                        if (h.timestamp) {
+                            const hour = new Date(h.timestamp).getHours();
+                            const slot = hour < 12 ? 'Morning (6-12)' : hour < 17 ? 'Afternoon (12-5)' : 'Evening (5-11)';
+                            
+                            if (!timeSlots[slot]) {
+                                timeSlots[slot] = { count: 0, totalFocus: 0 };
+                            }
+                            timeSlots[slot].count++;
+                            timeSlots[slot].totalFocus += (h.focusScore || 70);
+                        }
+                    });
+                    
+                    let bestSlot = null;
+                    let bestAvg = 0;
+                    
+                    Object.entries(timeSlots).forEach(([slot, data]) => {
+                        const avg = data.totalFocus / data.count;
+                        if (avg > bestAvg) {
+                            bestAvg = avg;
+                            bestSlot = slot;
+                        }
+                    });
+                    
+                    return bestSlot ? { slot: bestSlot, score: Math.round(bestAvg) } : null;
+                } catch (error) {
+                    console.error('Error calculating best study time:', error);
+                    return null;
+                }
+            };
+            
+            const getStreakQuality = () => {
+                if (!stats.currentStreak || stats.currentStreak === 0) return null;
+                
+                const recentHistory = (history || []).slice(-stats.currentStreak);
+                if (recentHistory.length === 0) return null;
+                
+                const avgFocus = recentHistory.reduce((sum, h) => sum + (h.focusScore || 70), 0) / recentHistory.length;
+                const avgTrust = stats.trustScore || 70;
+                const quality = (avgFocus + avgTrust) / 2;
+                
+                return Math.round(quality);
+            };
+            
+            const getConsistencyTrend = () => {
+                if (!history || history.length < 4) return null;
+                
+                const recent = history.slice(-4);
+                const older = history.slice(-8, -4);
+                
+                if (older.length === 0) return null;
+                
+                const recentAvg = recent.reduce((sum, h) => sum + (h.focusScore || 70), 0) / recent.length;
+                const olderAvg = older.reduce((sum, h) => sum + (h.focusScore || 70), 0) / older.length;
+                
+                const diff = recentAvg - olderAvg;
+                
+                if (diff > 5) return { direction: 'up', value: Math.round(diff) };
+                if (diff < -5) return { direction: 'down', value: Math.round(Math.abs(diff)) };
+                return { direction: 'stable', value: 0 };
+            };
+            
+            const getLastSession = () => {
+                if (!history || history.length === 0) return null;
+                
+                const last = history[history.length - 1];
+                const duration = last.timeRatio ? (last.timeRatio * 60) : 0;
+                const focusScore = last.focusScore || 0;
+                const engagement = focusScore >= 80 ? 'High' : focusScore >= 50 ? 'Medium' : 'Low';
+                
+                return {
+                    duration: duration.toFixed(1),
+                    focusScore,
+                    engagement,
+                    date: last.date
+                };
+            };
+            
+            const getMissedDayRecovery = () => {
+                const today = format(new Date(), 'yyyy-MM-dd');
+                const yesterday = format(new Date(Date.now() - 86400000), 'yyyy-MM-dd');
+                
+                const yesterdayData = (history || []).find(h => h.date === yesterday);
+                const todayData = (history || []).find(h => h.date === today);
+                
+                if (!yesterdayData && !todayData) {
+                    return { missed: true, recoveryMinutes: 20 };
+                }
+                
+                return null;
+            };
+            
+            const bestTime = getBestStudyTime();
+            const streakQuality = getStreakQuality();
+            const trend = getConsistencyTrend();
+            const lastSession = getLastSession();
+            const missedRecovery = getMissedDayRecovery();
+            
+            return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '1rem' } },
+                bestTime && React.createElement('div', { className: 'glass-panel', style: { padding: '1rem', borderLeft: '4px solid var(--accent-primary)' } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                        React.createElement(Clock, { size: 20, color: 'var(--accent-primary)' }),
+                        React.createElement('div', null,
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Best Study Time'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' } },
+                                `You perform best in the ${bestTime.slot}`
+                            ),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.75rem', color: 'var(--accent-secondary)' } },
+                                `Avg Focus: ${bestTime.score}%`
+                            )
+                        )
+                    )
+                ),
+                streakQuality !== null && stats.currentStreak > 0 && React.createElement('div', { className: 'glass-panel', style: { padding: '1rem', borderLeft: '4px solid var(--accent-secondary)' } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                        React.createElement(Zap, { size: 20, color: 'var(--accent-secondary)' }),
+                        React.createElement('div', null,
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Streak Quality'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' } },
+                                `${stats.currentStreak}-day streak (Quality: ${streakQuality}%)`
+                            ),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.75rem', color: streakQuality >= 75 ? 'var(--accent-secondary)' : streakQuality >= 50 ? 'var(--warning)' : 'var(--danger)' } },
+                                streakQuality >= 75 ? '🔥 Excellent quality!' : streakQuality >= 50 ? '👍 Good quality' : '⚠️ Needs improvement'
+                            )
+                        )
+                    )
+                ),
+                trend && React.createElement('div', { className: 'glass-panel', style: { padding: '1rem', borderLeft: `4px solid ${trend.direction === 'up' ? 'var(--accent-secondary)' : trend.direction === 'down' ? 'var(--danger)' : 'var(--warning)'}` } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                        trend.direction === 'up' ? React.createElement(TrendingUp, { size: 20, color: 'var(--accent-secondary)' }) : 
+                        trend.direction === 'down' ? React.createElement(TrendingDown, { size: 20, color: 'var(--danger)' }) : 
+                        React.createElement(Target, { size: 20, color: 'var(--warning)' }),
+                        React.createElement('div', null,
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Consistency Trend'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' } },
+                                trend.direction === 'up' ? 'Consistency improving ↑' : trend.direction === 'down' ? 'Consistency declining ↓' : 'Consistency stable →'
+                            ),
+                            trend.value > 0 && React.createElement('p', { style: { margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' } },
+                                `${trend.direction === 'up' ? '+' : '-'}${trend.value}% vs last week`
+                            )
+                        )
+                    )
+                ),
+                lastSession && React.createElement('div', { className: 'glass-panel', style: { padding: '1rem', borderLeft: '4px solid var(--accent-primary)' } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                        React.createElement(Zap, { size: 20, color: 'var(--accent-primary)' }),
+                        React.createElement('div', { style: { flex: 1 } },
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Last Session'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--text-main)' } },
+                                `${lastSession.duration} hrs | Focus: ${lastSession.focusScore}% | ${lastSession.engagement} engagement`
+                            ),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' } }, lastSession.date)
+                        )
+                    )
+                ),
+                missedRecovery && React.createElement('div', { className: 'glass-panel pulse-animation', style: { padding: '1rem', borderLeft: '4px solid var(--warning)', background: 'rgba(245, 158, 11, 0.1)' } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                        React.createElement(AlertCircle, { size: 20, color: 'var(--warning)' }),
+                        React.createElement('div', null,
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Recovery Needed'),
+                            React.createElement('p', { style: { margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--warning)' } },
+                                `You missed yesterday. Add ${missedRecovery.recoveryMinutes} minutes today to recover.`
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        
+        // SessionValidationModal Component
+        function SessionValidationModal({ task, sessionData, onSubmit, onCancel }) {
+            const [topicsStudied, setTopicsStudied] = useState('');
+            const [timeEstimate, setTimeEstimate] = useState('');
+            const [reflection, setReflection] = useState('');
+            const [isAnalyzing, setIsAnalyzing] = useState(false);
+            
+            const handleSubmit = async () => {
+                setIsAnalyzing(true);
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const actualMinutes = Math.floor(sessionData.seconds / 60);
+                const estimatedMinutes = parseInt(timeEstimate) || 0;
+                const timeDifference = Math.abs(actualMinutes - estimatedMinutes);
+                
+                let validationPenalty = 0;
+                let validationWarnings = [];
+                
+                if (timeDifference > actualMinutes * 0.5) {
+                    validationPenalty += 10;
+                    validationWarnings.push('Time estimate significantly off');
+                }
+                
+                if (topicsStudied.trim().length < 10) {
+                    validationPenalty += 15;
+                    validationWarnings.push('Topics description too brief');
+                }
+                
+                if (reflection.trim().length < 30) {
+                    validationPenalty += 10;
+                    validationWarnings.push('Reflection too short');
+                }
+                
+                onSubmit({
+                    topicsStudied,
+                    timeEstimate: estimatedMinutes,
+                    reflection,
+                    validationPenalty,
+                    validationWarnings
+                });
+            };
+            
+            const minLength = 30;
+            const charCount = reflection.trim().length;
+            const isValid = topicsStudied.trim().length >= 10 && timeEstimate && charCount >= minLength;
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0,0,0,0.9)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    animation: 'fadeIn 0.3s'
+                }
+            },
+                React.createElement('div', {
+                    className: 'glass-panel',
+                    style: {
+                        padding: '2.5rem',
+                        maxWidth: '600px',
+                        width: '90%',
+                        border: '1px solid var(--accent-primary)',
+                        background: 'var(--bg-card)'
+                    }
+                },
+                    isAnalyzing ? React.createElement('div', { style: { textAlign: 'center', padding: '2rem' } },
+                        React.createElement('div', {
+                            className: 'shimmer',
+                            style: {
+                                width: '80px',
+                                height: '80px',
+                                margin: '0 auto 1.5rem',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.6) 50%, rgba(59, 130, 246, 0.2) 100%)',
+                                backgroundSize: '200% 100%',
+                                animation: 'shimmer 1.5s infinite'
+                            }
+                        }),
+                        React.createElement('h2', { style: { color: 'var(--accent-primary)', marginBottom: '0.5rem' } }, 'Analyzing Session...'),
+                        React.createElement('p', { style: { color: 'var(--text-muted)' } }, 'Validating behavioral signals and responses')
+                    ) : React.createElement(React.Fragment, null,
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' } },
+                            React.createElement('div', { style: { padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' } },
+                                React.createElement(CheckCircle2, { size: 28, color: 'var(--accent-primary)' })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('h2', { style: { margin: 0, color: 'var(--accent-primary)', fontSize: '1.5rem' } }, 'Session Validation'),
+                                React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Verify your study session details')
+                            )
+                        ),
+                        React.createElement('div', {
+                            style: {
+                                padding: '1rem',
+                                background: 'rgba(59, 130, 246, 0.1)',
+                                border: '1px solid var(--accent-primary)',
+                                borderRadius: '8px',
+                                marginBottom: '1.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem'
+                            }
+                        },
+                            React.createElement(Clock, { size: 20, color: 'var(--accent-primary)' }),
+                            React.createElement('div', null,
+                                React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' } }, 'Session Duration'),
+                                React.createElement('p', { style: { margin: 0, fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)' } },
+                                    `${Math.floor(sessionData.seconds / 60)} minutes ${sessionData.seconds % 60} seconds`
+                                )
+                            )
+                        ),
+                        React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem' } },
+                            React.createElement('div', null,
+                                React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-main)', fontWeight: '600' } },
+                                    'Which topics did you study? ',
+                                    React.createElement('span', { style: { color: 'var(--danger)' } }, '*')
+                                ),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    value: topicsStudied,
+                                    onChange: (e) => setTopicsStudied(e.target.value),
+                                    placeholder: 'e.g., Binary search trees, recursion patterns...',
+                                    style: {
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        border: topicsStudied.trim().length >= 10 ? '1px solid var(--accent-secondary)' : '1px solid rgba(255,255,255,0.2)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontSize: '0.95rem'
+                                    }
+                                }),
+                                React.createElement('p', { style: { margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: topicsStudied.trim().length >= 10 ? 'var(--accent-secondary)' : 'var(--text-muted)' } },
+                                    topicsStudied.trim().length >= 10 ? '✓ Good' : `Need ${10 - topicsStudied.trim().length} more characters`
+                                )
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-main)', fontWeight: '600' } },
+                                    'Approximately how many minutes did you spend? ',
+                                    React.createElement('span', { style: { color: 'var(--danger)' } }, '*')
+                                ),
+                                React.createElement('input', {
+                                    type: 'number',
+                                    value: timeEstimate,
+                                    onChange: (e) => setTimeEstimate(e.target.value),
+                                    placeholder: 'Enter minutes...',
+                                    min: '1',
+                                    style: {
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        border: timeEstimate ? '1px solid var(--accent-secondary)' : '1px solid rgba(255,255,255,0.2)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontSize: '0.95rem'
+                                    }
+                                }),
+                                timeEstimate && React.createElement('p', { style: { margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' } },
+                                    `Actual: ${Math.floor(sessionData.seconds / 60)} mins • Your estimate: ${timeEstimate} mins`
+                                )
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { style: { display: 'block', marginBottom: '0.5rem', color: 'var(--text-main)', fontWeight: '600' } },
+                                    'What did you learn? (Reflection) ',
+                                    React.createElement('span', { style: { color: 'var(--danger)' } }, '*')
+                                ),
+                                React.createElement('textarea', {
+                                    value: reflection,
+                                    onChange: (e) => setReflection(e.target.value),
+                                    placeholder: 'Describe your key takeaways and insights...',
+                                    style: {
+                                        width: '100%',
+                                        height: '100px',
+                                        padding: '0.75rem',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        border: charCount >= minLength ? '1px solid var(--accent-secondary)' : '1px solid rgba(255,255,255,0.2)',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        fontSize: '0.95rem',
+                                        resize: 'vertical',
+                                        fontFamily: 'inherit'
+                                    }
+                                }),
+                                React.createElement('p', { style: { margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: charCount >= minLength ? 'var(--accent-secondary)' : 'var(--warning)' } },
+                                    `${charCount} / ${minLength} characters ${charCount >= minLength ? '✓' : ''}`
+                                )
+                            )
+                        ),
+                        React.createElement('div', {
+                            style: {
+                                padding: '1rem',
+                                background: 'rgba(245, 158, 11, 0.1)',
+                                border: '1px solid var(--warning)',
+                                borderRadius: '8px',
+                                marginBottom: '1.5rem',
+                                display: 'flex',
+                                gap: '0.75rem'
+                            }
+                        },
+                            React.createElement(AlertTriangle, { size: 20, color: 'var(--warning)', style: { flexShrink: 0, marginTop: '0.1rem' } }),
+                            React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-main)' } },
+                                'Your responses will be validated against session data. Unrealistic answers will reduce your trust score.'
+                            )
+                        ),
+                        React.createElement('div', { style: { display: 'flex', gap: '1rem' } },
+                            React.createElement('button', {
+                                onClick: onCancel,
+                                style: {
+                                    flex: 1,
+                                    padding: '1rem',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    color: 'var(--text-muted)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }
+                            }, 'Cancel'),
+                            React.createElement('button', {
+                                onClick: handleSubmit,
+                                disabled: !isValid,
+                                style: {
+                                    flex: 2,
+                                    padding: '1rem',
+                                    background: isValid ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                                    color: isValid ? 'white' : 'rgba(255,255,255,0.3)',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    cursor: isValid ? 'pointer' : 'not-allowed',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }
+                            },
+                                React.createElement(CheckCircle2, { size: 18 }),
+                                isValid ? 'Submit & Analyze' : 'Complete all fields...'
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        
+        // SessionSummaryModal Component
+        function SessionSummaryModal({ result, onClose }) {
+            if (!result) return null;
+            
+            const { 
+                title, 
+                durationMins, 
+                focusScore, 
+                sessionSeconds, 
+                insight,
+                presenceChecksPassed = 0,
+                presenceChecksFailed = 0,
+                trustScoreChange = 0,
+                validationWarnings = [],
+                completionPercentage = null
+            } = result;
+            
+            const formatMinSec = (sec) => {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return `${m}m ${s}s`;
+            };
+            
+            let scoreColor = 'var(--accent-secondary)';
+            if (focusScore < 50) scoreColor = 'var(--danger)';
+            else if (focusScore < 80) scoreColor = 'var(--warning)';
+            
+            return React.createElement('div', { 
+                style: { 
+                    position: 'fixed', 
+                    inset: 0, 
+                    background: 'rgba(0,0,0,0.8)', 
+                    backdropFilter: 'blur(8px)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    zIndex: 1000, 
+                    padding: '1rem' 
+                }
+            },
+                React.createElement('div', { 
+                    className: 'pulse-animation glass-panel', 
+                    style: { 
+                        background: 'var(--bg-card)', 
+                        padding: '2.5rem', 
+                        borderRadius: '16px', 
+                        maxWidth: '400px', 
+                        width: '100%', 
+                        border: `1px solid ${scoreColor}`, 
+                        textAlign: 'center' 
+                    }
+                },
+                    React.createElement('div', { 
+                        style: { 
+                            display: 'inline-flex', 
+                            padding: '1rem', 
+                            background: 'rgba(255,255,255,0.05)', 
+                            borderRadius: '50%', 
+                            color: scoreColor, 
+                            marginBottom: '1.5rem' 
+                        }
+                    },
+                        focusScore >= 80 ? React.createElement(Target, { size: 48 }) : 
+                        focusScore >= 50 ? React.createElement(Clock, { size: 48 }) : 
+                        React.createElement(Zap, { size: 48 })
+                    ),
+                    React.createElement('h2', { style: { fontSize: '1.8rem', marginBottom: '0.5rem', color: 'var(--text-main)' } }, 'Session Complete'),
+                    React.createElement('p', { style: { color: 'var(--text-muted)', marginBottom: '2rem' } }, title),
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' } },
+                        React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Time Spent'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold' } }, formatMinSec(sessionSeconds))
+                        ),
+                        React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: `3px solid ${scoreColor}` } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Focus Score'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: scoreColor } }, `${focusScore}%`)
+                        ),
+                        completionPercentage !== null && React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-primary)' } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Completed'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-primary)' } }, `${completionPercentage}%`)
+                        ),
+                        presenceChecksPassed > 0 && React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-secondary)' } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Verified'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-secondary)' } }, `${presenceChecksPassed}x ✓`)
+                        ),
+                        presenceChecksFailed > 0 && React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--danger)' } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Missed Checks'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--danger)' } }, `${presenceChecksFailed}x`)
+                        ),
+                        React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: `3px solid ${trustScoreChange >= 0 ? 'var(--accent-secondary)' : 'var(--danger)'}` } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Trust Change'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: trustScoreChange >= 0 ? 'var(--accent-secondary)' : 'var(--danger)' } },
+                                `${trustScoreChange >= 0 ? '+' : ''}${trustScoreChange}`
+                            )
+                        )
+                    ),
+                    React.createElement('div', { style: { padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: `4px solid ${scoreColor}`, textAlign: 'left', marginBottom: '2rem' } },
+                        React.createElement('p', { style: { margin: 0, fontSize: '0.95rem', color: 'var(--text-main)' } }, insight),
+                        validationWarnings.length > 0 && React.createElement('p', { style: { margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: 'var(--warning)' } },
+                            `⚠️ ${validationWarnings.length} validation issue(s) detected`
+                        )
+                    ),
+                    React.createElement('button', {
+                        onClick: onClose,
+                        style: { 
+                            width: '100%', 
+                            padding: '1rem', 
+                            background: 'var(--accent-primary)', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '8px', 
+                            fontWeight: 'bold', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: '0.5rem' 
+                        }
+                    },
+                        React.createElement(CheckCircle2, { size: 20 }), ' Continue to Dashboard'
+                    )
+                )
+            );
+        }
+
+        
+        // Main App Component
+        function App() {
+            const [plan, setPlan] = useState(() => getPlan());
+            const [tasks, setTasks] = useState(() => getTasks());
+            const [stats, setStats] = useState(() => getStats());
+            const [activeTaskId, setActiveTaskId] = useState(null);
+            const [validatingTask, setValidatingTask] = useState(null);
+            const [sessionSeconds, setSessionSeconds] = useState(0);
+            const [sessionResult, setSessionResult] = useState(null);
+            const [insight, setInsight] = useState("");
+            const [lastTrustChange, setLastTrustChange] = useState(0);
+            
+            useEffect(() => {
+                if (!plan) return;
+                const todayStr = format(new Date(), 'yyyy-MM-dd');
+                
+                let updatedTasks = [...tasks];
+                let changed = false;
+                updatedTasks.forEach(t => {
+                    if (new Date(t.date) < new Date(todayStr) && t.status === 'pending') {
+                        t.date = todayStr;
+                        changed = true;
+                    }
+                });
+                
+                if (changed) {
+                    setTasks(updatedTasks);
+                    saveTasks(updatedTasks);
+                }
+            }, [plan?.createdAt]);
+            
+            const handlePlanGenerate = (details) => {
+                const newTasks = generateStudyPlan(details);
+                const newPlan = { 
+                    ...details, 
+                    topic: details.subject,
+                    createdAt: new Date().toISOString() 
+                };
+                
+                const newStats = {
+                    totalTasksAssigned: newTasks.length,
+                    totalTasksCompleted: 0,
+                    currentStreak: 0,
+                    longestStreak: 0,
+                    consistencyScore: 100,
+                    trustScore: 100,
+                    history: []
+                };
+                
+                setPlan(newPlan);
+                setTasks(newTasks);
+                setStats(newStats);
+                
+                savePlan(newPlan);
+                saveTasks(newTasks);
+                saveStats(newStats);
+                
+                setInsight("Plan generated successfully! Let's get started on day one.");
+            };
+            
+            const handleToggleTask = (taskId, status, externalStats = null, externalRatio = null, sessionMetrics = null, customTasksState = null) => {
+                const stateTasks = customTasksState || tasks;
+                const updatedTasks = stateTasks.map(t => t.id === taskId ? { ...t, status } : t);
+                setTasks(updatedTasks);
+                saveTasks(updatedTasks);
+                
+                const newStats = externalStats || { ...stats };
+                
+                if (status === 'completed') {
+                    newStats.totalTasksCompleted += 1;
+                    
+                    const todayStr = format(new Date(), 'yyyy-MM-dd');
+                    const todaysTasksList = updatedTasks.filter(t => t.date === todayStr);
+                    const allDoneToday = todaysTasksList.every(t => t.status === 'completed');
+                    const todayDayOfWeek = format(new Date(), 'EEEE');
+                    
+                    if (allDoneToday) {
+                        if ((newStats.trustScore ?? 100) >= 50) {
+                            newStats.currentStreak += 1;
+                            newStats.longestStreak = Math.max(newStats.longestStreak, newStats.currentStreak);
+                        }
+                        
+                        newStats.history.push({
+                            date: todayStr,
+                            dayOfWeek: todayDayOfWeek,
+                            status: 'completed',
+                            timeRatio: externalRatio,
+                            interactions: sessionMetrics?.interactions || 0,
+                            tabSwitches: sessionMetrics?.tabSwitches || 0,
+                            focusScore: sessionMetrics?.focusScore || 70,
+                            trustScore: newStats.trustScore,
+                            topic: sessionMetrics?.topic,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                }
+                
+                setStats(newStats);
+                saveStats(newStats);
+                
+                const newInsight = generateInsights(newStats, newStats.history);
+                setInsight(newInsight);
+            };
+            
+            const handleStartSession = (task) => {
+                setActiveTaskId(task.id);
+            };
+            
+            const handleStopTimer = (sessionData) => {
+                const { 
+                    seconds, 
+                    tabSwitches, 
+                    interactions, 
+                    completedSubtasks,
+                    presenceChecksPassed = 0,
+                    presenceChecksFailed = 0,
+                    inactiveSeconds = 0,
+                    confidenceDecay = 0,
+                    warnings = 0
+                } = sessionData;
+                
+                const task = tasks.find(t => t.id === activeTaskId);
+                const targetSeconds = task.durationMins * 60;
+                
+                const minThreshold = targetSeconds * 0.3;
+                if (seconds < minThreshold && seconds < 600) {
+                    let newStats = { ...stats };
+                    newStats.trustScore = Math.max(0, (newStats.trustScore || 100) - 15);
+                    setStats(newStats);
+                    saveTasks(tasks);
+                    saveStats(newStats);
+                    alert(`Too fast! You must study for at least 30% of the target time (${Math.ceil(minThreshold / 60)} mins) to formally complete this task. Your authenticity score took a hit.`);
+                    
+                    setSessionSeconds(0);
+                    setActiveTaskId(null);
+                    return;
+                }
+                
+                setSessionSeconds(seconds);
+                setValidatingTask({ 
+                    ...task, 
+                    sessionMetadata: {
+                        ...sessionData,
+                        presenceChecksPassed,
+                        presenceChecksFailed,
+                        inactiveSeconds,
+                        confidenceDecay,
+                        warnings
+                    }
+                });
+                setActiveTaskId(null);
+            };
+            
+            const handleValidationSubmit = (validationData) => {
+                const task = validatingTask;
+                const { 
+                    seconds, 
+                    tabSwitches, 
+                    interactions, 
+                    completedSubtasks,
+                    presenceChecksPassed = 0,
+                    presenceChecksFailed = 0,
+                    inactiveSeconds = 0,
+                    confidenceDecay = 0,
+                    warnings = 0
+                } = task.sessionMetadata;
+                
+                const {
+                    topicsStudied = '',
+                    timeEstimate = 0,
+                    reflection = '',
+                    validationPenalty = 0,
+                    validationWarnings = []
+                } = validationData;
+                
+                let newStats = { ...stats };
+                if (!newStats.trustScore) newStats.trustScore = 100;
+                
+                let trustShift = 0;
+                
+                const targetSeconds = task.durationMins * 60;
+                if (seconds > targetSeconds * 0.8) trustShift += 10;
+                else if (seconds > targetSeconds * 0.5) trustShift += 5;
+                
+                if (interactions < 3) trustShift -= 15;
+                else if (interactions > 10) trustShift += 5;
+                
+                if (tabSwitches > 0) trustShift -= (tabSwitches * 5);
+                
+                if (reflection.trim().length > 40) trustShift += 5;
+                else if (reflection.trim().length < 20) trustShift -= 5;
+                
+                if (presenceChecksPassed > 0) trustShift += (presenceChecksPassed * 8);
+                if (presenceChecksFailed > 0) trustShift -= (presenceChecksFailed * 20);
+                
+                const inactiveMinutes = Math.floor(inactiveSeconds / 60);
+                if (inactiveMinutes > 2) trustShift -= (inactiveMinutes * 3);
+                
+                trustShift -= confidenceDecay;
+                trustShift -= validationPenalty;
+                trustShift -= (warnings * 5);
+                
+                newStats.trustScore = Math.min(100, Math.max(0, newStats.trustScore + trustShift));
+                
+                if (!newStats.behaviorPatterns) newStats.behaviorPatterns = [];
+                
+                const sessionPattern = {
+                    duration: seconds,
+                    interactions,
+                    tabSwitches,
+                    presenceChecksPassed,
+                    presenceChecksFailed,
+                    inactiveMinutes,
+                    timestamp: Date.now()
+                };
+                
+                newStats.behaviorPatterns.push(sessionPattern);
+                
+                if (newStats.behaviorPatterns.length > 10) {
+                    newStats.behaviorPatterns = newStats.behaviorPatterns.slice(-10);
+                }
+                
+                let suspiciousPatternDetected = false;
+                let patternWarning = '';
+                
+                if (newStats.behaviorPatterns.length >= 3) {
+                    const recentPatterns = newStats.behaviorPatterns.slice(-3);
+                    
+                    const durations = recentPatterns.map(p => p.duration);
+                    const allSame = durations.every(d => Math.abs(d - durations[0]) < 10);
+                    if (allSame) {
+                        suspiciousPatternDetected = true;
+                        patternWarning = '⚠️ Unusual activity pattern detected: Identical session durations';
+                        trustShift -= 10;
+                    }
+                    
+                    const avgInteractions = recentPatterns.reduce((sum, p) => sum + p.interactions, 0) / recentPatterns.length;
+                    if (avgInteractions < 2) {
+                        suspiciousPatternDetected = true;
+                        patternWarning = '⚠️ Unusual activity pattern detected: Consistently low interaction';
+                        trustShift -= 15;
+                    }
+                    
+                    const totalFailed = recentPatterns.reduce((sum, p) => sum + p.presenceChecksFailed, 0);
+                    if (totalFailed >= 2) {
+                        suspiciousPatternDetected = true;
+                        patternWarning = '⚠️ Unusual activity pattern detected: Multiple presence check failures';
+                        trustShift -= 20;
+                    }
+                }
+                
+                const finalTrustShift = trustShift + (suspiciousPatternDetected ? -10 : 0);
+                newStats.trustScore = Math.min(100, Math.max(0, newStats.trustScore + finalTrustShift));
+                
+                setLastTrustChange(finalTrustShift);
+                
+                let updatedTasksForToggle = tasks.map(t => {
+                    if (t.id === task.id && t.subtasks) {
+                        const upSub = t.subtasks.map(s => ({ ...s, isCompleted: true }));
+                        return { ...t, subtasks: upSub };
+                    }
+                    return t;
+                });
+                
+                const ratio = seconds / targetSeconds;
+                
+                let focusScore = 100;
+                if (seconds < targetSeconds * 0.5) focusScore -= 20;
+                else if (seconds < targetSeconds * 0.8) focusScore -= 10;
+                
+                if (interactions < 3) focusScore -= 30;
+                else if (interactions < 10) focusScore -= 15;
+                
+                if (tabSwitches > 0) focusScore -= (tabSwitches * 20);
+                if (reflection.trim().length < 30) focusScore -= 15;
+                
+                if (presenceChecksFailed > 0) focusScore -= (presenceChecksFailed * 25);
+                if (inactiveMinutes > 2) focusScore -= (inactiveMinutes * 5);
+                if (validationPenalty > 0) focusScore -= validationPenalty;
+                
+                focusScore = Math.max(0, Math.min(100, focusScore));
+                
+                let sessionInsight = '';
+                if (focusScore >= 80) sessionInsight = "🔥 Excellent session! High interaction and solid focus.";
+                else if (focusScore >= 50) sessionInsight = "👍 Good session, but try taking more notes or switching tabs less.";
+                else sessionInsight = "⚠️ Low engagement detected. Poor time ratio or heavy tab switching.";
+                
+                if (suspiciousPatternDetected) {
+                    sessionInsight = patternWarning;
+                }
+                
+                if (validationWarnings.length > 0) {
+                    sessionInsight += ` Validation issues: ${validationWarnings.join(', ')}`;
+                }
+                
+                handleToggleTask(task.id, 'completed', newStats, ratio, {
+                    interactions,
+                    tabSwitches,
+                    focusScore,
+                    topic: task.title,
+                    presenceChecksPassed,
+                    presenceChecksFailed,
+                    inactiveMinutes,
+                    validationWarnings: validationWarnings.length
+                }, updatedTasksForToggle);
+                
+                setValidatingTask(null);
+                setSessionSeconds(0);
+                
+                setSessionResult({
+                    title: task.title,
+                    durationMins: task.durationMins,
+                    sessionSeconds: seconds,
+                    focusScore,
+                    insight: sessionInsight,
+                    presenceChecksPassed,
+                    presenceChecksFailed,
+                    trustScoreChange: trustShift,
+                    validationWarnings
+                });
+            };
+            
+            const handleReset = () => {
+                clearAll();
+                window.location.reload();
+            };
+            
+            const todayStr = format(new Date(), 'yyyy-MM-dd');
+            const todaysTasks = tasks.filter(t => t.date === todayStr);
+            const activeTaskObj = tasks.find(t => t.id === activeTaskId);
+            
+            let failurePrediction = null;
+            if (plan && stats.totalTasksCompleted > 0) {
+                const createdAt = new Date(plan.createdAt);
+                const deadline = new Date(plan.deadline);
+                const today = new Date();
+                
+                const totalDaysIntended = Math.max(1, Math.ceil((deadline - createdAt) / (1000 * 60 * 60 * 24)));
+                const daysElapsed = Math.max(1, Math.ceil((today - createdAt) / (1000 * 60 * 60 * 24)));
+                
+                const currentVelocity = stats.totalTasksCompleted / daysElapsed;
+                const projectedTotal = currentVelocity * totalDaysIntended;
+                const totalTasksInPlan = tasks.length;
+                
+                if (projectedTotal < totalTasksInPlan) {
+                    const projectedPercent = Math.round((projectedTotal / totalTasksInPlan) * 100);
+                    failurePrediction = `Predictive Alert: At your current pace, you may complete only ${projectedPercent}% of your syllabus before the deadline.`;
+                }
+            }
+            
+            const weakAreas = [];
+            if (stats.history && stats.history.length > 0) {
+                const topicScores = {};
+                stats.history.forEach(h => {
+                    if (h.topic && h.focusScore !== undefined) {
+                        if (!topicScores[h.topic]) topicScores[h.topic] = [];
+                        topicScores[h.topic].push(h.focusScore);
+                    }
+                });
+                
+                for (const [topic, scores] of Object.entries(topicScores)) {
+                    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+                    if (avg < 60) {
+                        weakAreas.push({ topic, avg: Math.round(avg) });
+                    }
+                }
+            }
+            
+            const needsRecovery = failurePrediction !== null || (stats.totalTasksAssigned > 4 && (stats.totalTasksCompleted / stats.totalTasksAssigned) < 0.6);
+            
+            const handleActivateRecovery = () => {
+                let updatedTasks = [...tasks];
+                const targetDates = [
+                    format(new Date(), 'yyyy-MM-dd'),
+                    format(new Date(Date.now() + 86400000), 'yyyy-MM-dd'),
+                    format(new Date(Date.now() + 172800000), 'yyyy-MM-dd')
+                ];
+                
+                let loadIncreased = false;
+                updatedTasks.forEach(t => {
+                    if (targetDates.includes(t.date) && t.status === 'pending') {
+                        t.durationMins += 30;
+                        loadIncreased = true;
+                    }
+                });
+                
+                if (loadIncreased) {
+                    setTasks(updatedTasks);
+                    saveTasks(updatedTasks);
+                    setInsight("✅ Recovery Plan Activated! I've forcefully added +30 minutes to your load for the next 3 days.");
+                } else {
+                    setInsight("⚠️ No pending tasks found in the next 3 days to expand.");
+                }
+            };
+
+            
+            return React.createElement(Layout, null,
+                !plan ? React.createElement('div', { className: 'glass-panel', style: { padding: '2rem' } },
+                    React.createElement('div', { style: { textAlign: 'center', marginBottom: '2rem' } },
+                        React.createElement('h2', { style: { fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--text-main)' } }, 'AI Learning Consistency Coach'),
+                        React.createElement('p', { style: { color: 'var(--text-muted)' } }, 'Generate a behavior-aware study plan to ensure you genuinely cross the finish line.')
+                    ),
+                    React.createElement(PlanForm, { onGenerate: handlePlanGenerate })
+                ) : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '1.5rem' } },
+                    React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' } },
+                        React.createElement('h2', { style: { color: 'var(--text-main)', margin: 0 } }, `Dashboard (${plan.topic})`),
+                        React.createElement('button', {
+                            onClick: handleReset,
+                            style: { background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }
+                        }, 'Reset Plan')
+                    ),
+                    React.createElement(ProgressWidgets, { stats: stats, lastTrustChange: lastTrustChange }),
+                    failurePrediction && React.createElement('div', { style: { padding: '1rem', marginBottom: '1.5rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', fontSize: '0.9rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                        React.createElement('span', { style: { fontSize: '1.2rem' } }, '⚠️'), ' ', failurePrediction
+                    ),
+                    needsRecovery && React.createElement('div', { style: { padding: '1rem', marginBottom: '1.5rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid var(--warning)', color: 'var(--warning)', fontSize: '0.9rem', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' } },
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '0.75rem' } },
+                            React.createElement('span', { style: { fontSize: '1.2rem' } }, '🔄'),
+                            React.createElement('div', null,
+                                React.createElement('h4', { style: { margin: 0, fontSize: '1rem' } }, 'Recovery Plan Required'),
+                                React.createElement('p', { style: { margin: 0, fontSize: '0.8rem', opacity: 0.9 } }, 'You are falling behind your optimal pace. Activate Recovery to redistribute remaining tasks and explicitly add 30 minutes to your work for the next 3 days.')
+                            )
+                        ),
+                        React.createElement('button', {
+                            onClick: handleActivateRecovery,
+                            className: 'pulse-animation',
+                            style: { background: 'var(--warning)', color: '#000', padding: '0.6rem 1.2rem', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }
+                        }, 'Activate Recovery')
+                    ),
+                    React.createElement(InsightsPanel, { message: insight }),
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' } },
+                        React.createElement(ConsistencyHeatmap, { history: stats.history, days: 14 }),
+                        React.createElement(BehavioralInsights, { stats: stats, history: stats.history })
+                    ),
+                    weakAreas.length > 0 && React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem', borderLeft: '4px solid var(--danger)' } },
+                        React.createElement('h3', { style: { fontSize: '1rem', color: 'var(--danger)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } }, '🔻 Weak Areas Detected'),
+                        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' } },
+                            weakAreas.slice(0, 3).map((wa, idx) => React.createElement('div', { key: idx, style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px' } },
+                                React.createElement('p', { style: { margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' } }, wa.topic),
+                                React.createElement('p', { style: { margin: 0, fontSize: '0.75rem', color: 'var(--danger)' } }, `Avg Focus: ${wa.avg}%`)
+                            ))
+                        )
+                    ),
+                    activeTaskId && React.createElement(Timer, { activeTask: activeTaskObj, onStop: handleStopTimer }),
+                    !activeTaskId && !validatingTask && React.createElement(DailyTasks, {
+                        tasks: todaysTasks,
+                        stats: stats,
+                        onToggleStatus: handleToggleTask,
+                        onStartSession: handleStartSession
+                    })
+                ),
+                validatingTask && React.createElement(SessionValidationModal, {
+                    task: validatingTask,
+                    sessionData: validatingTask.sessionMetadata,
+                    onSubmit: handleValidationSubmit,
+                    onCancel: () => setValidatingTask(null)
+                }),
+                sessionResult && React.createElement(SessionSummaryModal, {
+                    result: sessionResult,
+                    onClose: () => setSessionResult(null)
+                })
+            );
+        }
+        
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(React.StrictMode, null, React.createElement(App)));
+    </script>
+</body>
 </html>
