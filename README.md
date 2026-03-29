@@ -716,7 +716,7 @@ This project was inspired by the need for genuine accountability in online learn
 ### Get in Touch
 
 - 📧 **Email**: [sapan022006@gmial.com](mailto:your.email@example.com)
-- 💼 **LinkedIn**: [www.linkedin.com/in/sapan-desai-b83799234](https://linkedin.com/in/yourprofile)
+- 💼 **LinkedIn**: [https://www.linkedin.com/in/sapan-desai-b83799234/](https://linkedin.com/in/yourprofile)
 - 🌐 **Website**: [http://sapandesai.me/Web-Developer-Portfolio/](https://yourwebsite.com)
 
 ### Report Issues
