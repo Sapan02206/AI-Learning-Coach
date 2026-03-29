@@ -272,6 +272,425 @@ textarea:focus {
         const Zap = createSvgIcon("M13 2L3 14h9l-1 8 10-12h-9l1-8z");
         const AlertCircle = createSvgIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 8v4 M12 16h.01");
         
+        // ============================================
+        // ADVANCED BEHAVIORAL TRACKING SERVICE
+        // ============================================
+        class AdvancedBehaviorTracker {
+            constructor() {
+                this.isTracking = false;
+                this.sessionData = {
+                    mouseMovements: 0,
+                    scrollEvents: 0,
+                    keyboardEvents: 0,
+                    clickEvents: 0,
+                    lastActivityTime: Date.now(),
+                    scrollDepth: 0,
+                    scrollSpeed: [],
+                    interactionDensity: 0,
+                    focusLost: 0,
+                    idleTime: 0,
+                    mouseIntensity: 0
+                };
+                this.startTime = null;
+                this.lastScrollTime = null;
+                this.lastScrollY = 0;
+                this.mousePositions = [];
+            }
+            
+            start() {
+                if (this.isTracking) return;
+                this.isTracking = true;
+                this.startTime = Date.now();
+                this.sessionData.lastActivityTime = Date.now();
+                
+                document.addEventListener('mousemove', this.handleMouseMove);
+                document.addEventListener('scroll', this.handleScroll);
+                document.addEventListener('keydown', this.handleKeyboard);
+                document.addEventListener('click', this.handleClick);
+                window.addEventListener('focus', this.handleFocus);
+                window.addEventListener('blur', this.handleBlur);
+                document.addEventListener('visibilitychange', this.handleVisibilityChange);
+            }
+            
+            stop() {
+                if (!this.isTracking) return;
+                this.isTracking = false;
+                
+                document.removeEventListener('mousemove', this.handleMouseMove);
+                document.removeEventListener('scroll', this.handleScroll);
+                document.removeEventListener('keydown', this.handleKeyboard);
+                document.removeEventListener('click', this.handleClick);
+                window.removeEventListener('focus', this.handleFocus);
+                window.removeEventListener('blur', this.handleBlur);
+                document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+            }
+            
+            handleMouseMove = (e) => {
+                this.sessionData.mouseMovements++;
+                this.sessionData.lastActivityTime = Date.now();
+                this.mousePositions.push({ x: e.clientX, y: e.clientY, time: Date.now() });
+                if (this.mousePositions.length > 100) this.mousePositions.shift();
+            };
+            
+            handleScroll = () => {
+                const currentTime = Date.now();
+                const currentScrollY = window.scrollY;
+                
+                this.sessionData.scrollEvents++;
+                this.sessionData.lastActivityTime = currentTime;
+                
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const scrollPercentage = (currentScrollY + windowHeight) / documentHeight * 100;
+                this.sessionData.scrollDepth = Math.max(this.sessionData.scrollDepth, scrollPercentage);
+                
+                if (this.lastScrollTime) {
+                    const timeDiff = currentTime - this.lastScrollTime;
+                    const scrollDiff = Math.abs(currentScrollY - this.lastScrollY);
+                    const speed = scrollDiff / timeDiff;
+                    this.sessionData.scrollSpeed.push(speed);
+                }
+                
+                this.lastScrollTime = currentTime;
+                this.lastScrollY = currentScrollY;
+            };
+            
+            handleKeyboard = () => {
+                this.sessionData.keyboardEvents++;
+                this.sessionData.lastActivityTime = Date.now();
+            };
+            
+            handleClick = () => {
+                this.sessionData.clickEvents++;
+                this.sessionData.lastActivityTime = Date.now();
+            };
+            
+            handleFocus = () => {
+                this.sessionData.lastActivityTime = Date.now();
+            };
+            
+            handleBlur = () => {
+                this.sessionData.focusLost++;
+            };
+            
+            handleVisibilityChange = () => {
+                if (document.hidden) {
+                    this.sessionData.focusLost++;
+                } else {
+                    this.sessionData.lastActivityTime = Date.now();
+                }
+            };
+            
+            calculateMouseIntensity() {
+                if (this.mousePositions.length < 2) return 0;
+                let totalDistance = 0;
+                for (let i = 1; i < this.mousePositions.length; i++) {
+                    const dx = this.mousePositions[i].x - this.mousePositions[i-1].x;
+                    const dy = this.mousePositions[i].y - this.mousePositions[i-1].y;
+                    totalDistance += Math.sqrt(dx*dx + dy*dy);
+                }
+                return totalDistance / this.mousePositions.length;
+            }
+            
+            getSessionData() {
+                const elapsedSeconds = (Date.now() - this.startTime) / 1000;
+                const totalInteractions = 
+                    this.sessionData.mouseMovements +
+                    this.sessionData.scrollEvents +
+                    this.sessionData.keyboardEvents +
+                    this.sessionData.clickEvents;
+                
+                this.sessionData.interactionDensity = (totalInteractions / elapsedSeconds) * 60;
+                this.sessionData.mouseIntensity = this.calculateMouseIntensity();
+                
+                const timeSinceLastActivity = (Date.now() - this.sessionData.lastActivityTime) / 1000;
+                if (timeSinceLastActivity > 120) {
+                    this.sessionData.idleTime = timeSinceLastActivity;
+                }
+                
+                return {
+                    ...this.sessionData,
+                    elapsedSeconds,
+                    averageScrollSpeed: this.sessionData.scrollSpeed.length > 0
+                        ? this.sessionData.scrollSpeed.reduce((a, b) => a + b, 0) / this.sessionData.scrollSpeed.length
+                        : 0
+                };
+            }
+            
+            reset() {
+                this.sessionData = {
+                    mouseMovements: 0,
+                    scrollEvents: 0,
+                    keyboardEvents: 0,
+                    clickEvents: 0,
+                    lastActivityTime: Date.now(),
+                    scrollDepth: 0,
+                    scrollSpeed: [],
+                    interactionDensity: 0,
+                    focusLost: 0,
+                    idleTime: 0,
+                    mouseIntensity: 0
+                };
+                this.startTime = Date.now();
+                this.lastScrollTime = null;
+                this.lastScrollY = 0;
+                this.mousePositions = [];
+            }
+        }
+        
+        const advancedBehaviorTracker = new AdvancedBehaviorTracker();
+        
+        // ============================================
+        // VIDEO LEARNING SESSION COMPONENT
+        // ============================================
+        function VideoLearningSession({ onSessionComplete }) {
+            const [videoUrl, setVideoUrl] = useState('');
+            const [isActive, setIsActive] = useState(false);
+            const [videoId, setVideoId] = useState('');
+            const [sessionData, setSessionData] = useState({
+                playCount: 0,
+                pauseCount: 0,
+                seekCount: 0,
+                completionRate: 0,
+                watchTime: 0,
+                startTime: null
+            });
+            const playerRef = useRef(null);
+            const intervalRef = useRef(null);
+            
+            const extractVideoId = (url) => {
+                const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+                return match ? match[1] : null;
+            };
+            
+            const handleStartSession = () => {
+                const id = extractVideoId(videoUrl);
+                if (!id) {
+                    alert('Invalid YouTube URL');
+                    return;
+                }
+                setVideoId(id);
+                setIsActive(true);
+                setSessionData(prev => ({ ...prev, startTime: Date.now() }));
+                advancedBehaviorTracker.start();
+            };
+            
+            const handleStopSession = () => {
+                advancedBehaviorTracker.stop();
+                const behaviorData = advancedBehaviorTracker.getSessionData();
+                const finalData = {
+                    ...sessionData,
+                    ...behaviorData,
+                    type: 'video',
+                    videoId,
+                    endTime: Date.now()
+                };
+                onSessionComplete(finalData);
+                setIsActive(false);
+                setVideoId('');
+                setVideoUrl('');
+            };
+            
+            useEffect(() => {
+                if (!isActive || !videoId) return;
+                
+                const script = document.createElement('script');
+                script.src = 'https://www.youtube.com/iframe_api';
+                document.body.appendChild(script);
+                
+                window.onYouTubeIframeAPIReady = () => {
+                    playerRef.current = new window.YT.Player('youtube-player', {
+                        videoId: videoId,
+                        events: {
+                            onStateChange: (event) => {
+                                if (event.data === window.YT.PlayerState.PLAYING) {
+                                    setSessionData(prev => ({ ...prev, playCount: prev.playCount + 1 }));
+                                } else if (event.data === window.YT.PlayerState.PAUSED) {
+                                    setSessionData(prev => ({ ...prev, pauseCount: prev.pauseCount + 1 }));
+                                }
+                            }
+                        }
+                    });
+                };
+                
+                intervalRef.current = setInterval(() => {
+                    if (playerRef.current && playerRef.current.getCurrentTime) {
+                        const current = playerRef.current.getCurrentTime();
+                        const duration = playerRef.current.getDuration();
+                        const completion = (current / duration) * 100;
+                        setSessionData(prev => ({
+                            ...prev,
+                            watchTime: current,
+                            completionRate: completion
+                        }));
+                    }
+                }, 1000);
+                
+                return () => {
+                    if (intervalRef.current) clearInterval(intervalRef.current);
+                };
+            }, [isActive, videoId]);
+            
+            if (!isActive) {
+                return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem' } },
+                    React.createElement('h3', { style: { marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                        React.createElement(Play, { size: 20, color: 'var(--accent-primary)' }),
+                        ' Video Learning Session'
+                    ),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: videoUrl,
+                        onChange: (e) => setVideoUrl(e.target.value),
+                        placeholder: 'Paste YouTube URL here...',
+                        style: { width: '100%', padding: '0.75rem', marginBottom: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }
+                    }),
+                    React.createElement('button', {
+                        onClick: handleStartSession,
+                        disabled: !videoUrl,
+                        style: { padding: '0.75rem 1.5rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: videoUrl ? 'pointer' : 'not-allowed', fontWeight: '600' }
+                    }, 'Start Video Session')
+                );
+            }
+            
+            return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--accent-primary)' } },
+                React.createElement('div', { style: { marginBottom: '1rem' } },
+                    React.createElement('div', { id: 'youtube-player', style: { width: '100%', height: '400px', borderRadius: '8px', overflow: 'hidden' } })
+                ),
+                React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' } },
+                    React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px' } },
+                        React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Completion'),
+                        React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-primary)' } }, `${Math.round(sessionData.completionRate)}%`)
+                    ),
+                    React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px' } },
+                        React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Plays'),
+                        React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold' } }, sessionData.playCount)
+                    ),
+                    React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px' } },
+                        React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Pauses'),
+                        React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold' } }, sessionData.pauseCount)
+                    )
+                ),
+                React.createElement('button', {
+                    onClick: handleStopSession,
+                    style: { width: '100%', padding: '0.75rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }
+                }, 'End Video Session')
+            );
+        }
+        
+        // ============================================
+        // PDF LEARNING SESSION COMPONENT
+        // ============================================
+        function PDFLearningSession({ onSessionComplete }) {
+            const [file, setFile] = useState(null);
+            const [isActive, setIsActive] = useState(false);
+            const [currentPage, setCurrentPage] = useState(1);
+            const [totalPages, setTotalPages] = useState(0);
+            const [pageTimeTracking, setPageTimeTracking] = useState({});
+            const [sessionStart, setSessionStart] = useState(null);
+            const fileInputRef = useRef(null);
+            
+            const handleFileSelect = (e) => {
+                const selectedFile = e.target.files[0];
+                if (selectedFile && selectedFile.type === 'application/pdf') {
+                    setFile(selectedFile);
+                }
+            };
+            
+            const handleStartSession = () => {
+                if (!file) return;
+                setIsActive(true);
+                setSessionStart(Date.now());
+                setPageTimeTracking({ 1: Date.now() });
+                advancedBehaviorTracker.start();
+            };
+            
+            const handleStopSession = () => {
+                advancedBehaviorTracker.stop();
+                const behaviorData = advancedBehaviorTracker.getSessionData();
+                const finalData = {
+                    ...behaviorData,
+                    type: 'pdf',
+                    fileName: file.name,
+                    totalPages,
+                    pagesVisited: Object.keys(pageTimeTracking).length,
+                    pageTimeTracking,
+                    sessionDuration: Date.now() - sessionStart,
+                    endTime: Date.now()
+                };
+                onSessionComplete(finalData);
+                setIsActive(false);
+                setFile(null);
+                setCurrentPage(1);
+            };
+            
+            const handlePageChange = (newPage) => {
+                setPageTimeTracking(prev => ({
+                    ...prev,
+                    [newPage]: Date.now()
+                }));
+                setCurrentPage(newPage);
+            };
+            
+            if (!isActive) {
+                return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem' } },
+                    React.createElement('h3', { style: { marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+                        React.createElement(Square, { size: 20, color: 'var(--accent-secondary)' }),
+                        ' PDF Learning Session'
+                    ),
+                    React.createElement('input', {
+                        ref: fileInputRef,
+                        type: 'file',
+                        accept: 'application/pdf',
+                        onChange: handleFileSelect,
+                        style: { display: 'none' }
+                    }),
+                    React.createElement('button', {
+                        onClick: () => fileInputRef.current.click(),
+                        style: { width: '100%', padding: '0.75rem', marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', cursor: 'pointer' }
+                    }, file ? file.name : 'Choose PDF File'),
+                    file && React.createElement('button', {
+                        onClick: handleStartSession,
+                        style: { width: '100%', padding: '0.75rem', background: 'var(--accent-secondary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }
+                    }, 'Start PDF Session')
+                );
+            }
+            
+            return React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--accent-secondary)' } },
+                React.createElement('div', { style: { marginBottom: '1rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+                    React.createElement('p', { style: { color: 'var(--text-muted)' } }, `PDF Viewer - Page ${currentPage} of ${totalPages || '?'}`)
+                ),
+                React.createElement('div', { style: { display: 'flex', gap: '1rem', marginBottom: '1rem' } },
+                    React.createElement('button', {
+                        onClick: () => handlePageChange(Math.max(1, currentPage - 1)),
+                        disabled: currentPage === 1,
+                        style: { flex: 1, padding: '0.5rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '8px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }
+                    }, 'Previous'),
+                    React.createElement('button', {
+                        onClick: () => handlePageChange(currentPage + 1),
+                        style: { flex: 1, padding: '0.5rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }
+                    }, 'Next')
+                ),
+                React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' } },
+                    React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
+                        React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)' } }, 'Pages Visited'),
+                        React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold' } }, Object.keys(pageTimeTracking).length)
+                    ),
+                    React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
+                        React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)' } }, 'Scroll Depth'),
+                        React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold' } }, `${Math.round(advancedBehaviorTracker.sessionData.scrollDepth)}%`)
+                    ),
+                    React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' } },
+                        React.createElement('p', { style: { fontSize: '0.75rem', color: 'var(--text-muted)' } }, 'Interactions'),
+                        React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold' } }, advancedBehaviorTracker.sessionData.clickEvents + advancedBehaviorTracker.sessionData.keyboardEvents)
+                    )
+                ),
+                React.createElement('button', {
+                    onClick: handleStopSession,
+                    style: { width: '100%', padding: '0.75rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }
+                }, 'End PDF Session')
+            );
+        }
+        
         // Storage Service
         const PLAN_KEY = 'ai_coach_plan';
         const TASKS_KEY = 'ai_coach_tasks';
@@ -1773,7 +2192,9 @@ textarea:focus {
                 presenceChecksFailed = 0,
                 trustScoreChange = 0,
                 validationWarnings = [],
-                completionPercentage = null
+                completionPercentage = null,
+                engagementScore = null,
+                behaviorType = null
             } = result;
             
             const formatMinSec = (sec) => {
@@ -1836,6 +2257,14 @@ textarea:focus {
                             React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Focus Score'),
                             React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: scoreColor } }, `${focusScore}%`)
                         ),
+                        engagementScore !== null && React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-secondary)' } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Engagement'),
+                            React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-secondary)' } }, `${engagementScore}%`)
+                        ),
+                        behaviorType && React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--warning)' } },
+                            React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Behavior Type'),
+                            React.createElement('p', { style: { fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--warning)' } }, behaviorType)
+                        ),
                         completionPercentage !== null && React.createElement('div', { style: { background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', borderBottom: '3px solid var(--accent-primary)' } },
                             React.createElement('p', { style: { fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.25rem' } }, 'Completed'),
                             React.createElement('p', { style: { fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent-primary)' } }, `${completionPercentage}%`)
@@ -1896,6 +2325,96 @@ textarea:focus {
             const [sessionResult, setSessionResult] = useState(null);
             const [insight, setInsight] = useState("");
             const [lastTrustChange, setLastTrustChange] = useState(0);
+            const [learningMode, setLearningMode] = useState('traditional'); // 'traditional', 'video', 'pdf'
+            
+            // Handle video/PDF session completion
+            const handleAdvancedSessionComplete = (sessionData) => {
+                const { type, elapsedSeconds, interactionDensity, mouseIntensity, scrollDepth } = sessionData;
+                
+                // Calculate enhanced scores
+                let focusScore = 100;
+                let engagementScore = 100;
+                
+                // Interaction density scoring
+                if (interactionDensity < 5) {
+                    focusScore -= 30;
+                    engagementScore -= 40;
+                } else if (interactionDensity < 15) {
+                    focusScore -= 15;
+                    engagementScore -= 20;
+                }
+                
+                // Mouse intensity scoring
+                if (mouseIntensity < 10) {
+                    engagementScore -= 20;
+                } else if (mouseIntensity > 100) {
+                    engagementScore += 10;
+                }
+                
+                // Content-specific scoring
+                if (type === 'video') {
+                    const { completionRate, pauseCount, playCount } = sessionData;
+                    if (completionRate < 50) focusScore -= 25;
+                    if (pauseCount > playCount * 2) focusScore -= 15;
+                    if (completionRate > 80) engagementScore += 15;
+                } else if (type === 'pdf') {
+                    const { pagesVisited, totalPages } = sessionData;
+                    const coverage = (pagesVisited / (totalPages || 1)) * 100;
+                    if (coverage < 30) focusScore -= 20;
+                    if (scrollDepth < 50) engagementScore -= 15;
+                    if (coverage > 70) engagementScore += 10;
+                }
+                
+                focusScore = Math.max(0, Math.min(100, focusScore));
+                engagementScore = Math.max(0, Math.min(100, engagementScore));
+                
+                // Determine learning behavior type
+                let behaviorType = 'Balanced Learner';
+                if (focusScore > 80 && engagementScore > 80) {
+                    behaviorType = 'Highly Engaged Learner';
+                } else if (focusScore > 70 && engagementScore < 50) {
+                    behaviorType = 'Focused but Passive';
+                } else if (focusScore < 50 && engagementScore > 70) {
+                    behaviorType = 'Active but Distracted';
+                } else if (focusScore < 50 && engagementScore < 50) {
+                    behaviorType = 'Needs Improvement';
+                }
+                
+                // Update stats
+                let newStats = { ...stats };
+                newStats.totalTasksCompleted += 1;
+                
+                // Add to history
+                const todayStr = format(new Date(), 'yyyy-MM-dd');
+                newStats.history.push({
+                    date: todayStr,
+                    dayOfWeek: format(new Date(), 'EEEE'),
+                    status: 'completed',
+                    focusScore,
+                    engagementScore,
+                    behaviorType,
+                    learningMode: type,
+                    trustScore: newStats.trustScore,
+                    timestamp: new Date().toISOString(),
+                    sessionData
+                });
+                
+                setStats(newStats);
+                saveStats(newStats);
+                
+                // Show result
+                setSessionResult({
+                    title: `${type === 'video' ? 'Video' : 'PDF'} Learning Session`,
+                    sessionSeconds: elapsedSeconds,
+                    focusScore,
+                    engagementScore,
+                    behaviorType,
+                    insight: `${behaviorType} - Focus: ${focusScore}%, Engagement: ${engagementScore}%`,
+                    trustScoreChange: 0
+                });
+                
+                setLearningMode('traditional');
+            };
             
             useEffect(() => {
                 if (!plan) return;
@@ -2315,6 +2834,52 @@ textarea:focus {
                         }, 'Activate Recovery')
                     ),
                     React.createElement(InsightsPanel, { message: insight }),
+                    
+                    React.createElement('div', { className: 'glass-panel', style: { padding: '1.5rem', marginBottom: '1.5rem' } },
+                        React.createElement('h3', { style: { marginBottom: '1rem' } }, 'Learning Mode'),
+                        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' } },
+                            React.createElement('button', {
+                                onClick: () => setLearningMode('traditional'),
+                                style: {
+                                    padding: '1rem',
+                                    background: learningMode === 'traditional' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                                    color: 'white',
+                                    border: learningMode === 'traditional' ? '2px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: learningMode === 'traditional' ? 'bold' : 'normal'
+                                }
+                            }, '📚 Traditional'),
+                            React.createElement('button', {
+                                onClick: () => setLearningMode('video'),
+                                style: {
+                                    padding: '1rem',
+                                    background: learningMode === 'video' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                                    color: 'white',
+                                    border: learningMode === 'video' ? '2px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: learningMode === 'video' ? 'bold' : 'normal'
+                                }
+                            }, '🎥 Video'),
+                            React.createElement('button', {
+                                onClick: () => setLearningMode('pdf'),
+                                style: {
+                                    padding: '1rem',
+                                    background: learningMode === 'pdf' ? 'var(--accent-secondary)' : 'rgba(255,255,255,0.05)',
+                                    color: 'white',
+                                    border: learningMode === 'pdf' ? '2px solid var(--accent-secondary)' : '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: learningMode === 'pdf' ? 'bold' : 'normal'
+                                }
+                            }, '📄 PDF')
+                        )
+                    ),
+                    
+                    learningMode === 'video' && React.createElement(VideoLearningSession, { onSessionComplete: handleAdvancedSessionComplete }),
+                    learningMode === 'pdf' && React.createElement(PDFLearningSession, { onSessionComplete: handleAdvancedSessionComplete }),
+                    
                     React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' } },
                         React.createElement(ConsistencyHeatmap, { history: stats.history, days: 14 }),
                         React.createElement(BehavioralInsights, { stats: stats, history: stats.history })
