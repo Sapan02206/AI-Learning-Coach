@@ -488,49 +488,49 @@ cd AI-Learning-Coach
 
 ## 📸 Screenshots
 
-### Dashboard & Trust Score System
+### Main Dashboard
 ![Dashboard](screenshots/Screenshot%202026-03-29%20140516.png)
-*Main dashboard showing trust score, consistency tracking, and daily tasks*
+*Main dashboard showing trust score, learning credibility, streak counter, and progress widgets*
 
-### Video Learning Mode
-![Video Learning](screenshots/Screenshot%202026-03-29%20140907.png)
-*YouTube video integration with real-time behavioral tracking*
+### Study Plan Creation
+![Study Plan](screenshots/Screenshot%202026-03-29%20140907.png)
+*AI-powered study plan generation with subject, deadline, daily minutes, and difficulty settings*
 
-### Smart Content Validation
-![Content Validation](screenshots/Screenshot%202026-03-29%20140932.png)
-*4-step smart validation system in action*
+### Video Content Validation
+![Video Validation](screenshots/Screenshot%202026-03-29%20140932.png)
+*Smart content validation system blocking non-educational videos with 280+ keywords*
+
+### Video Learning Session
+![Video Session](screenshots/Screenshot%202026-03-29%20140953.png)
+*Active video learning session with real-time behavioral tracking and engagement metrics*
 
 ### PDF Learning Mode
-![PDF Learning](screenshots/Screenshot%202026-03-29%20140953.png)
-*PDF reader with page tracking and highlighting features*
+![PDF Learning](screenshots/Screenshot%202026-03-29%20141009.png)
+*PDF reader with fullscreen mode, page navigation, highlighting, and reading metrics*
 
-### Real-Time Metrics
-![Real-Time Metrics](screenshots/Screenshot%202026-03-29%20141009.png)
-*Live engagement and focus tracking during sessions*
-
-### Session Summary
+### Session Completion Summary
 ![Session Summary](screenshots/Screenshot%202026-03-29%20142808.png)
-*Detailed session results with behavioral analysis*
+*Session results showing focus score, engagement score, and trust score changes*
 
 ### Consistency Heatmap
 ![Consistency Heatmap](screenshots/Screenshot%202026-03-29%20143333.png)
-*Visual 14-day consistency tracking with color-coded performance*
+*14-day visual calendar showing study consistency with color-coded performance*
 
-### AI Insights
-![AI Insights](screenshots/Screenshot%202026-03-29%20151921.png)
-*Personalized AI-generated insights and recommendations*
+### Daily Task Management
+![Daily Tasks](screenshots/Screenshot%202026-03-29%20151921.png)
+*Today's focus tasks with subtasks, duration tracking, and completion status*
 
-### Study Plan Generation
-![Study Plan](screenshots/Screenshot%202026-03-29%20153714.png)
-*AI-powered study plan creation with task breakdown*
+### AI-Generated Insights
+![AI Insights](screenshots/Screenshot%202026-03-29%20153714.png)
+*Personalized insights and recommendations based on learning patterns and behavior*
 
-### Behavioral Tracking
-![Behavioral Tracking](screenshots/Screenshot%202026-03-29%20162203.png)
-*Advanced behavioral metrics and engagement monitoring*
+### Behavioral Analytics Dashboard
+![Behavioral Analytics](screenshots/Screenshot%202026-03-29%20162203.png)
+*Comprehensive behavioral metrics showing engagement patterns and interaction analysis*
 
-### Trust Score Analytics
-![Trust Score Analytics](screenshots/Screenshot%202026-03-29%20162630.png)
-*Detailed trust score breakdown and credibility tracking*
+### Trust Score Breakdown
+![Trust Score](screenshots/Screenshot%202026-03-29%20162630.png)
+*Detailed trust score analytics with risk level assessment and credibility tracking*
 
 ---
 
