@@ -482,13 +482,33 @@ textarea:focus {
                 try {
                     console.log('Validating video content for ID:', videoId);
                     
-                    // Educational keywords
+                    // Educational keywords - MUST have at least one
                     const educationalKeywords = [
                         'tutorial', 'lecture', 'course', 'learn', 'education', 'study',
                         'lesson', 'teaching', 'training', 'guide', 'how to', 'explained',
                         'programming', 'math', 'science', 'history', 'language', 'coding',
                         'algorithm', 'data structure', 'physics', 'chemistry', 'biology',
-                        'calculus', 'algebra', 'geometry', 'statistics', 'computer'
+                        'calculus', 'algebra', 'geometry', 'statistics', 'computer',
+                        'engineering', 'medical', 'anatomy', 'philosophy', 'economics',
+                        'finance', 'accounting', 'business', 'marketing', 'design',
+                        'development', 'software', 'hardware', 'network', 'database',
+                        'machine learning', 'artificial intelligence', 'data science',
+                        'web development', 'app development', 'python', 'java', 'javascript',
+                        'react', 'angular', 'vue', 'node', 'sql', 'css', 'html',
+                        'exam', 'test', 'preparation', 'interview', 'career', 'skill'
+                    ];
+                    
+                    // Non-educational keywords - BLOCK if found
+                    const nonEducationalKeywords = [
+                        'music', 'song', 'movie', 'trailer', 'game', 'gaming', 'gameplay',
+                        'funny', 'meme', 'vlog', 'prank', 'comedy', 'entertainment',
+                        'tmkoc', 'taarak mehta', 'serial', 'episode', 'show', 'drama',
+                        'cartoon', 'anime', 'film', 'cinema', 'bollywood', 'hollywood',
+                        'dance', 'party', 'celebration', 'wedding', 'travel', 'food',
+                        'cooking show', 'reality show', 'talent show', 'sports', 'cricket',
+                        'football', 'match', 'highlights', 'goals', 'funny moments',
+                        'best scenes', 'compilation', 'reaction', 'review', 'unboxing',
+                        'haul', 'makeup', 'fashion', 'lifestyle', 'daily vlog'
                     ];
                     
                     // Try to fetch video metadata
@@ -496,42 +516,51 @@ textarea:focus {
                         const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
                         
                         if (!response.ok) {
-                            console.warn('Could not fetch video metadata, allowing by default');
+                            console.warn('Could not fetch video metadata, BLOCKING by default for safety');
                             setIsValidating(false);
-                            return true; // Allow if can't validate
+                            return false; // BLOCK if can't validate (safer approach)
                         }
                         
                         const data = await response.json();
                         const title = data.title.toLowerCase();
+                        const author = data.author_name ? data.author_name.toLowerCase() : '';
                         console.log('Video title:', data.title);
+                        console.log('Channel:', data.author_name);
                         
-                        // Check if title contains educational keywords
-                        const isEducational = educationalKeywords.some(keyword => title.includes(keyword));
+                        // FIRST: Check for non-educational keywords (BLOCK immediately)
+                        const hasNonEducational = nonEducationalKeywords.some(keyword => 
+                            title.includes(keyword) || author.includes(keyword)
+                        );
                         
-                        if (!isEducational) {
-                            // Check for non-educational keywords
-                            const nonEducationalKeywords = ['music', 'song', 'movie', 'trailer', 'game', 'funny', 'meme', 'vlog', 'prank', 'comedy', 'entertainment'];
-                            const isNonEducational = nonEducationalKeywords.some(keyword => title.includes(keyword));
-                            
-                            if (isNonEducational) {
-                                console.warn('Non-educational content detected');
-                                setIsValidating(false);
-                                return false;
-                            }
+                        if (hasNonEducational) {
+                            console.warn('❌ Non-educational content detected in title/channel');
+                            setIsValidating(false);
+                            return false;
+                        }
+                        
+                        // SECOND: REQUIRE educational keywords (MUST have at least one)
+                        const hasEducational = educationalKeywords.some(keyword => 
+                            title.includes(keyword) || author.includes(keyword)
+                        );
+                        
+                        if (!hasEducational) {
+                            console.warn('❌ No educational keywords found - BLOCKING');
+                            setIsValidating(false);
+                            return false;
                         }
                         
                         console.log('✓ Content validated as educational');
                         setIsValidating(false);
                         return true;
                     } catch (fetchError) {
-                        console.warn('Fetch error, allowing video:', fetchError);
+                        console.warn('Fetch error, BLOCKING video for safety:', fetchError);
                         setIsValidating(false);
-                        return true; // Allow if validation fails
+                        return false; // BLOCK if validation fails (safer)
                     }
                 } catch (error) {
                     console.error('Validation error:', error);
                     setIsValidating(false);
-                    return true; // Allow by default if validation fails
+                    return false; // BLOCK by default if validation fails (safer)
                 }
             };
             
